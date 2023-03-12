@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from loader import bot, dp
-from handlers import common
+from handlers import userdialog
 
 
 logging.basicConfig(level=logging.INFO)
@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 async def main():
     await bot.delete_webhook()
-    dp.include_router(common.router)
+    dp.include_router(userdialog.router)
     await dp.start_polling(bot)
 
 
