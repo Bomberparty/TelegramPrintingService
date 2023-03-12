@@ -1,0 +1,3 @@
+[DEFAULT]
+token = YOUR_TOKEN
+admins = ADMIN_ID, ADMIN_ID

@@ -130,3 +130,7 @@ dmypy.json
 
 #Config
 settings.ini
+
+#trash
+.idea
+media
