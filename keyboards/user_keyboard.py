@@ -26,6 +26,7 @@ async def get_printing_method_kb() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
 
+
 async def pay_way_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],

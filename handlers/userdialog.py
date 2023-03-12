@@ -1,4 +1,4 @@
-from aiogram import types, F, filters
+from aiogram import types, F
 from aiogram.dispatcher.router import Router
 from aiogram.filters import Command, Text
 from aiogram.fsm.context import FSMContext
@@ -22,7 +22,8 @@ async def start(message: types.Message):
 
 @router.message(Text("Создать заказ"))
 async def create_task(message: types.Message, state: FSMContext):
-    await message.answer("Выберите вид заказа", reply_markup=await get_task_keyboard())
+    await message.answer("Выберите вид заказа",
+                         reply_markup=await get_task_keyboard())
     await state.set_state(CreateTask.choose_task)
 
 
@@ -40,43 +41,51 @@ async def get_file(message: types.Message, state: FSMContext):
         return await message.answer("Формат вашего файла отличен от PDF")
 
     # Будем брать из БД
-    task_id = str(message.document.id) + str(message.chat.id)
+    task_id = str(message.document.file_id) + str(message.chat.id)
     file_path = f"media/{task_id}.pdf"
     await bot.download(destination=file_path, file=message.document.file_id)
 
     await state.update_data(file_path=file_path)
-    await message.answer("Напишите в чат необходимое вам количество копий документа")
+    await message.answer("Напишите в чат необходимое вам количество "
+                         "копий документа")
     await state.set_state(CreateTask.number_of_copies)
 
 
 @router.message(CreateTask.number_of_copies)
-@router.message_handler(filters.RegexpCommandsFilter(regexp_commands=['item_([0-9]*)']))
+@router.message(F.text.regexp('item_([0-9]*)'))
 async def get_copies(message: types.Message, state: FSMContext):
-    number_of_copies = int(message.text)
-    await message.answer("Выберите тип печати", reply_markup=await get_printing_method_kb())
+    await state.update_data(number_of_copies=int(message.text))
+    await message.answer("Выберите тип печати",
+                         reply_markup=await get_printing_method_kb())
     await state.set_state(CreateTask.choose_printing_mode)
 
 
 @router.message(CreateTask.choose_printing_mode)
-async def printing_mode(message: types.Message, state: FSMContext, file_path: str, number_of_copies: int):
+async def printing_mode(message: types.Message, state: FSMContext):
     if message.text == "Одностороння печать":
         double_side = False
     elif message.text == "Двусторонняя печать":
         double_side = True
-    number_of_pages = await len(PdfReader(file_path).pages)
+    else:
+        return await message.answer("Неккоректный ввод")
+    data = await state.get_data()
+    await state.update_data(double_side=double_side)
+    number_of_pages = len(PdfReader(data["file_path"]).pages)
     
     #Необходимо продумать высчитывание стоимости заказа 
-    task_cost = number_of_pages*number_of_copies*5
+    task_cost = number_of_pages*data["number_of_copies"] * 4
 
     await message.answer(f'''Стоимость заказа составляет {task_cost} рублей. 
-    Теперь выберите удобный для вас метод оплаты''', reply_markup= await pay_way_keyboard())
+    Теперь выберите удобный для вас метод оплаты''',
+                         reply_markup=await pay_way_keyboard())
     await state.set_state(CreateTask.choose_pay_way)
 
 
 @router.message(CreateTask.choose_pay_way)
-async def pay_way(message: types.Message, state: FSMContext, task_cost: int, task_id: int):
+async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
         pass
     elif message.text == "Наличными при встрече":
-        await message.answer("Ваш заказ принят к ожиданию. Ожидаем с наличными в комнате 254")
-        await state.finish()
+        await message.answer("Ваш заказ принят к ожиданию. Ожидаем с наличными "
+                             "в комнате 254")
+        await state.clear()
