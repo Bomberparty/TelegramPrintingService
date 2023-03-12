@@ -14,9 +14,8 @@ router = Router()
 
 @router.message(Command("start", "help"))
 async def start(message: types.Message):
-    await message.answer('''Доброго времени суток, дорогой пользователь.
-    Для запуска сервиса нажмите 
-    "Создать заказ" ''', 
+    await message.answer('''Доброго времени суток, дорогой пользователь.\n'''
+    '''Для запуска сервиса нажмите\n"Создать заказ" ''',
                          reply_markup=await get_main_keyboard())
 
 
@@ -31,6 +30,7 @@ async def create_task(message: types.Message, state: FSMContext):
 async def get_task(message: types.Message, state: FSMContext):
     await state.update_data(service_type="Print")
     await message.answer("Отправьте документ")
+    await state.set_state(CreateTask.send_file)
 
 
 @router.message(CreateTask.send_file)
