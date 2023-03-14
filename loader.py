@@ -5,7 +5,7 @@ config = configparser.ConfigParser()
 
 config.read("settings.ini")
 
-print(config["DEFAULT"]["admins"].split())
+admins = config["DEFAULT"]["admins"].split()
 
 bot = Bot(token=config['DEFAULT']['token'])
 
