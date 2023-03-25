@@ -1,3 +1,4 @@
 [DEFAULT]
 token = YOUR_TOKEN
 admins = ADMIN_ID, ADMIN_ID
+dbname = YOUR_DATABASE_NAME.sql
