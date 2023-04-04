@@ -2,4 +2,5 @@ aiogram==3.0.0b7
 python-dotenv==0.21.1
 configparser==5.3.0
 pypdf2==3.0.1
-db-sqlite3==0.0.1
+aiosqlite3==0.18.0
+aiosqlite~=0.18.0

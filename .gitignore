@@ -134,3 +134,5 @@ settings.ini
 #trash
 .idea
 media
+database.db
+database.sql
