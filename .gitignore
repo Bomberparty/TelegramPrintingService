@@ -133,6 +133,6 @@ settings.ini
 
 #trash
 .idea
-media
+media/
 database.db
 database.sql

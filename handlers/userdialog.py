@@ -1,13 +1,16 @@
+from PyPDF2.errors import PdfReadError
 from aiogram import types, F
 from aiogram.dispatcher.router import Router
 from aiogram.filters import Command, Text, or_f, and_f, StateFilter
 from aiogram.fsm.context import FSMContext
+from PyPDF2 import PdfReader
 
 from keyboards.user_keyboard import *
 from states import CreateTask
 from loader import bot
+from utils.utils import prepare_to_downloading
+import database
 
-from PyPDF2 import PdfReader
 
 router = Router()
 
@@ -35,66 +38,79 @@ async def create_task(message: types.Message, state: FSMContext):
     await state.set_state(CreateTask.choose_task)
 
 
-@router.message(or_f(and_f(CreateTask.choose_task, Text("Печать")),
-                     and_f(CreateTask.number_of_copies, Text("Назад"))))
-async def get_task(message: types.Message, state: FSMContext):
-    if await state.get_state() == CreateTask.choose_task:
-        await state.update_data(service_type="Print")
-
+@router.message(CreateTask.number_of_copies, Text("Назад"))
+async def require_file(message: types.Message, state: FSMContext):
     await message.answer("Отправьте документ",
                          reply_markup=await get_simple_keyboard())
     await state.set_state(CreateTask.send_file)
 
 
-@router.message(or_f(CreateTask.send_file,
-                     and_f(CreateTask.choose_printing_mode, Text("Назад"))))
-async def get_file(message: types.Message, state: FSMContext):
-    if await state.get_state() == CreateTask.send_file:
-        if message.content_type != types.ContentType.DOCUMENT:
-            return await message.answer("Ваше сообщение не содержит документа")
-        if message.document.file_name[-4:] != ".pdf":
-            return await message.answer("Формат вашего файла отличен от PDF")
+@router.message(and_f(CreateTask.choose_task, Text("Печать")))
+async def get_task_type(message: types.Message, state: FSMContext):
+    id_ = await database.Database().create_new_task(message.from_user.id)
+    await state.update_data(task_type=database.TaskType.PRINT_TASK)
+    await state.update_data(id=id_)
+    await require_file(message, state)
 
-        # Будем брать из БД
-        task_id = str(message.document.file_id) + str(message.chat.id)
-        file_path = f"media/{task_id}.pdf"
-        await bot.download(destination=file_path, file=message.document.file_id)
-        await state.update_data(file_path=file_path)
 
+@router.message(CreateTask.choose_printing_mode, Text("Назад"))
+async def require_number_of_copies(message: types.Message, state: FSMContext):
     await message.answer("Напишите в чат необходимое вам количество "
                          "копий документа",
                          reply_markup=await get_simple_keyboard())
     await state.set_state(CreateTask.number_of_copies)
 
 
-@router.message(or_f(and_f(CreateTask.number_of_copies,
-                           F.text.regexp(r'\d+')),
-                     and_f(CreateTask.choose_pay_way, Text("Назад"))))
-async def get_copies(message: types.Message, state: FSMContext):
-    if await state.get_state() == CreateTask.number_of_copies:
-        await state.update_data(number_of_copies=int(message.text))
+@router.message(CreateTask.send_file)
+async def get_file(message: types.Message, state: FSMContext):
+    if message.content_type != types.ContentType.DOCUMENT:
+        return await message.answer("Ваше сообщение не содержит документа")
+    if message.document.file_name[-4:] != ".pdf":
+        return await message.answer("Формат вашего файла отличен от PDF")
+    data = await state.get_data()
+    file_path = f"media/{data['id']}.pdf"
+    prepare_to_downloading(file_path)
+    await bot.download(destination=file_path, file=message.document.file_id)
 
-    await message.answer("Выберите тип печати",
+    try:
+        number_of_pages = len(PdfReader(file_path).pages)
+    except PdfReadError:
+        return await message.answer("PDF файл не валиден")
+
+    await state.update_data(number_of_pages=number_of_pages)
+    await state.update_data(file_path=file_path)
+    await require_number_of_copies(message, state)
+
+
+@router.message(CreateTask.choose_pay_way, Text("Назад"))
+async def require_printing_mode(message: types.Message, state: FSMContext):
+    await message.answer("Выберите режим печати",
                          reply_markup=await get_printing_method_kb())
     await state.set_state(CreateTask.choose_printing_mode)
+
+
+@router.message(CreateTask.number_of_copies, F.text.regexp(r'\d+'))
+async def get_copies(message: types.Message, state: FSMContext):
+    await state.update_data(number_of_copies=int(message.text))
+
+    await require_printing_mode(message, state)
 
 
 @router.message(CreateTask.choose_printing_mode)
 async def printing_mode(message: types.Message, state: FSMContext):
     if message.text == "Одностороння печать":
-        double_side = False
+        sides_count = database.SidesCount.ONE
     elif message.text == "Двусторонняя печать":
-        double_side = True
+        sides_count = database.SidesCount.TWO
     else:
         return await message.answer("Неккоректный ввод")
     data = await state.get_data()
-    await state.update_data(double_side=double_side)
-    number_of_pages = len(PdfReader(data["file_path"]).pages)
+    await state.update_data(sides_count=sides_count)
 
     # Необходимо продумать высчитывание стоимости заказа
-    task_cost = number_of_pages * data["number_of_copies"] * 4
-
-    await message.answer(f'''Стоимость заказа составляет {task_cost} рублей. 
+    coast = data["number_of_pages"] * data["number_of_copies"] * 4
+    await state.update_data(coast=coast)
+    await message.answer(f'''Стоимость заказа составляет {coast} рублей. 
     Теперь выберите удобный для вас метод оплаты''',
                          reply_markup=await pay_way_keyboard())
     await state.set_state(CreateTask.choose_pay_way)
@@ -103,9 +119,18 @@ async def printing_mode(message: types.Message, state: FSMContext):
 @router.message(CreateTask.choose_pay_way)
 async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
-        pass
+        pay_way = database.PayWay.CARD
     elif message.text == "Наличными при встрече":
+        pay_way = database.PayWay.CASH
         await message.answer("Ваш заказ принят к ожиданию. Ожидаем с наличными "
                              "в комнате 254",
-                             reply_markup= await get_main_keyboard())
-        await state.clear()
+                             reply_markup=await get_main_keyboard())
+    else:
+        return
+    data = await state.get_data()
+    task = database.Task(data["id"], message.from_user.id, data["task_type"],
+                         data["file_path"], data["number_of_copies"],
+                         data["coast"], data["sides_count"], pay_way,
+                         database.TaskStatus.CONFIRMING)
+    await database.Database().finish_task_creation(task)
+    await state.clear()
