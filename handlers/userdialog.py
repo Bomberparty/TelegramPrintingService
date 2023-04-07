@@ -27,21 +27,21 @@ async def cancel(message: types.Message, state: FSMContext):
 async def start(message: types.Message):
     await message.answer('''Доброго времени суток, дорогой пользователь.\n'''
                          '''Для запуска сервиса нажмите\n"Создать заказ" ''',
-                         reply_markup=await get_main_keyboard())
+                         reply_markup=get_main_keyboard())
 
 
 @router.message(or_f(Text("Создать заказ"),
                      and_f(CreateTask.send_file, Text("Назад"))))
 async def create_task(message: types.Message, state: FSMContext):
     await message.answer("Выберите вид заказа",
-                         reply_markup=await get_task_keyboard())
+                         reply_markup=get_task_keyboard())
     await state.set_state(CreateTask.choose_task)
 
 
 @router.message(CreateTask.number_of_copies, Text("Назад"))
 async def require_file(message: types.Message, state: FSMContext):
     await message.answer("Отправьте документ",
-                         reply_markup=await get_simple_keyboard())
+                         reply_markup=get_simple_keyboard())
     await state.set_state(CreateTask.send_file)
 
 
@@ -57,7 +57,7 @@ async def get_task_type(message: types.Message, state: FSMContext):
 async def require_number_of_copies(message: types.Message, state: FSMContext):
     await message.answer("Напишите в чат необходимое вам количество "
                          "копий документа",
-                         reply_markup=await get_simple_keyboard())
+                         reply_markup=get_simple_keyboard())
     await state.set_state(CreateTask.number_of_copies)
 
 
@@ -85,7 +85,7 @@ async def get_file(message: types.Message, state: FSMContext):
 @router.message(CreateTask.choose_pay_way, Text("Назад"))
 async def require_printing_mode(message: types.Message, state: FSMContext):
     await message.answer("Выберите режим печати",
-                         reply_markup=await get_printing_method_kb())
+                         reply_markup=get_printing_method_kb())
     await state.set_state(CreateTask.choose_printing_mode)
 
 
@@ -112,7 +112,7 @@ async def printing_mode(message: types.Message, state: FSMContext):
     await state.update_data(coast=coast)
     await message.answer(f'''Стоимость заказа составляет {coast} рублей. 
     Теперь выберите удобный для вас метод оплаты''',
-                         reply_markup=await pay_way_keyboard())
+                         reply_markup=pay_way_keyboard())
     await state.set_state(CreateTask.choose_pay_way)
 
 
@@ -124,7 +124,7 @@ async def pay_way(message: types.Message, state: FSMContext):
         pay_way = database.PayWay.CASH
         await message.answer("Ваш заказ принят к ожиданию. Ожидаем с наличными "
                              "в комнате 254",
-                             reply_markup=await get_main_keyboard())
+                             reply_markup=get_main_keyboard())
     else:
         return
     data = await state.get_data()
