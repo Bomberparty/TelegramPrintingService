@@ -24,7 +24,8 @@ class TaskStatus(Enum):
     CONFIRMING = 1
     PENDING = 2
     FINISHED = 3
-    CANCELED = 3
+    CANCELED = 4
+    FAILED = 5
 
 
 @dataclass
@@ -102,11 +103,31 @@ class Database:
         await cursor.close()
         return id_
 
-    async def update_task_status(self, id_, new_status: TaskStatus) -> None:
-        cursor = await self.conn.execute("UPDATE tasks SET status=? WHERE"
+    async def update_task_status(self, id_: int, new_status: TaskStatus) -> None:
+        cursor = await self.conn.execute("UPDATE tasks SET status=? WHERE "
                                          "id=?", (new_status.value, id_))
         await self.conn.commit()
         await cursor.close()
+
+    async def get_task_status(self, id_: int) -> TaskStatus:
+        cursor = await self.conn.execute("SELECT status FROM tasks WHERE "
+                                         "id=?", (id_, ))
+        result = (await cursor.fetchone())[0]
+        await cursor.close()
+        return TaskStatus(result)
+
+    async def get_user_id_by_task_id(self, id_: int) -> int:
+        cursor = await self.conn.execute("""SELECT user_id FROM tasks WHERE \
+                                            id=?""", (id_, ))
+        result = (await cursor.fetchone())[0]
+        await cursor.close()
+        return result
+
+    async def get_task(self, id_: int) -> Task:
+        cursor = await self.conn.execute("""SELECT * FROM tasks WHERE id=?""",
+                                         (id_, ))
+        result = (await cursor.fetchone())
+        return Task(*result)
 
 
 async def main():
@@ -116,6 +137,7 @@ async def main():
     # SidesCount.ONE, PayWay.CARD, TaskStatus.PENDING)
     # await Database().finish_task_creation(task)
     # print(await Database().create_new_task())
+    print(await Database().get_task(16))
     await Database().close_database()
 
 

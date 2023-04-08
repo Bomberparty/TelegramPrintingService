@@ -6,7 +6,7 @@ from keyboards.callbacks import AdminTaskCallback, Actions
 async def get_task_keyboard(id_: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Разрешить печать",
-                                     callback_data=AdminTaskCallback(action=Actions.ACCEPT.value, task_id=id_)))
+                                     callback_data=AdminTaskCallback(action=Actions.ACCEPT, task_id=id_).pack()))
     builder.add(InlineKeyboardButton(text="Отмена",
-                                     callback_data=AdminTaskCallback(action=Actions.CANCEL.value, task_id=id_)))
+                                     callback_data=AdminTaskCallback(action=Actions.CANCEL, task_id=id_).pack()))
     return builder.as_markup()
