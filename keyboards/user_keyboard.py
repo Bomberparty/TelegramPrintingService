@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton,\
     InlineKeyboardButton, InlineKeyboardMarkup
 
 
-async def get_main_keyboard() -> ReplyKeyboardMarkup:
+def get_main_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="Создать заказ"), KeyboardButton(text="Помощь")],
         [KeyboardButton(text="Отмена")]
@@ -12,7 +12,7 @@ async def get_main_keyboard() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-async def get_task_keyboard() -> ReplyKeyboardMarkup:
+def get_task_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="Печать"), KeyboardButton(text="Сканирование")],
         [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
@@ -22,7 +22,7 @@ async def get_task_keyboard() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-async def get_printing_method_kb() -> ReplyKeyboardMarkup:
+def get_printing_method_kb() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="Одностороння печать"), KeyboardButton(text="Двусторонняя печать")],
         [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
@@ -31,7 +31,7 @@ async def get_printing_method_kb() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-async def pay_way_keyboard() -> ReplyKeyboardMarkup:
+def pay_way_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],
         [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
@@ -40,7 +40,7 @@ async def pay_way_keyboard() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-async def get_simple_keyboard() -> ReplyKeyboardMarkup:
+def get_simple_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
     ]
