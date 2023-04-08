@@ -6,8 +6,9 @@ from aiogram.fsm.context import FSMContext
 from PyPDF2 import PdfReader
 
 from keyboards.user_keyboard import *
+from keyboards import admin_keyboard
 from states import CreateTask
-from loader import bot
+from loader import bot, admins
 from utils.utils import prepare_to_downloading
 import database
 
@@ -133,4 +134,7 @@ async def pay_way(message: types.Message, state: FSMContext):
                          data["coast"], data["sides_count"], pay_way,
                          database.TaskStatus.CONFIRMING)
     await database.Database().finish_task_creation(task)
+    for admin_id in admins:
+        await bot.send_message(admin_id, f"Новый заказ: {task.id_}",
+                               reply_markup= await admin_keyboard.get_task_keyboard(task.id_))
     await state.clear()

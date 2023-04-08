@@ -5,7 +5,7 @@ config = configparser.ConfigParser()
 
 config.read("settings.ini")
 
-admins = config["DEFAULT"]["admins"].split()
+admins = list(map(int, config["DEFAULT"]["admins"].split()))
 
 dbname = config["DEFAULT"]["dbname"].split()[0]
 
