@@ -53,22 +53,6 @@ class Database:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    async def init_database(self) -> None:
-        self.conn = await aiosqlite.connect(dbname)
-        cursor = await self.conn.execute(f'''CREATE TABLE IF NOT EXISTS tasks(
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER,
-        task_type INTEGER,
-        file_path TEXT,
-        number_of_copies INTEGER, 
-        coast INT,
-        sides_count TEXT,
-        pay_way INTEGER,
-        status INTEGER
-        )''')
-        await self.conn.commit()
-        await cursor.close()
-
     async def close_database(self) -> None:
         await self.conn.close()
 
