@@ -42,11 +42,21 @@ class Task:
     pay_way: PayWay
     status: TaskStatus
 
+    def __post_init__(self):
+        #Нужно изменить этот костыль
+        if isinstance(self.task_type, int):
+            self.task_type = TaskType(self.task_type)
+        if isinstance(self.sides_count, str):
+            self.sides_count = SidesCount(self.sides_count)
+        if isinstance(self.pay_way, str):
+            self.pay_way = PayWay(self.pay_way)
+        if isinstance(self.status, str):
+            self.status = TaskStatus(self.status)
+
 
 def database_connect(func):
     async def wrapper(*args, **kwargs):
         async with aiosqlite.connect(loader.dbname) as conn:
-            print(conn, *args, **kwargs)
             return await func(*args, **kwargs, conn=conn)
 
     return wrapper
@@ -84,7 +94,6 @@ class Database:
         cursor = await conn.execute("SELECT MAX(id) FROM tasks")
         result = (await cursor.fetchone())[0]
         await cursor.close()
-        print(result)
         return (result if result is not None else -1) + 1
 
     @database_connect
@@ -128,7 +137,6 @@ class Database:
                                     (id_,))
         result = (await cursor.fetchone())
         return Task(*result)
-
 
 async def main():
     # await Database().init_database()
