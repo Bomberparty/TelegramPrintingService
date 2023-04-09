@@ -12,10 +12,10 @@ def _get_files():
             yield file  # елда, чтобы не жрало оперативку, когда будет много файлов
 
 
-def _run_migration(file_path):
+def _run_migration(file_path, dbname):
     # Тут просто читаем файл и передаём его как стейтмент
 
-    con = sqlite3.connect("db.sqlite3")
+    con = sqlite3.connect(f"{dbname}.sqlite3")
     cur = con.cursor()
     with open(file_path, 'r') as f:
         stmt = f.read().replace('\n', ' ')
@@ -25,7 +25,7 @@ def _run_migration(file_path):
     con.close()
 
 
-def run_migrations():
+def run_migrations(dbname):
     # Получаем последнюю версию бд
     current_version_path = f'{CURRENT_PATH}/current_version'
     with open(current_version_path, 'r') as f:
@@ -37,7 +37,7 @@ def run_migrations():
         if last_version > current_version:
             # Если есть, запускаем миграцию
             file_path = f'{CURRENT_PATH}/schemes/{file}'
-            _run_migration(file_path)
+            _run_migration(file_path, dbname)
 
         # Записываем номер миграции, которую только что запустили, т.к это последняя версия бд
         with open(current_version_path, 'w') as f:
