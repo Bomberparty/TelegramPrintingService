@@ -130,9 +130,11 @@ async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
         pay_way = database.PayWay.CARD
         numbers = Shift().get_active_number()
-        msg = 'Переведите средства через СБП в банк "Тинькофф" по номер'+ ('у: ' if len(numbers)==1 else 'ам: ')
-        for number in numbers:
-            msg += ("+7"+str(number) + " или ")
+        msg = 'Переведите средства через СБП в банк "Тинькофф" по номер'+ \
+              ('у: ' if len(numbers) == 1 else 'ам: ')
+        for index in range(len(numbers)):
+            msg += ("+7"+str(numbers[index]) +
+                    (" или " if index != len(numbers) - 1 else ""))
         await message.answer(msg, reply_markup=get_main_keyboard())
 
     elif message.text == "Наличными при встрече":
