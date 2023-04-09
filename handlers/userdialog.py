@@ -11,7 +11,7 @@ from states import CreateTask
 from loader import bot
 from filters import IsAdminFilter, IsAnyAdminsOnShiftFilter
 from utils.shift import Shift
-from utils.utils import prepare_to_downloading
+from utils.utils import prepare_to_downloading, get_number_of_pages
 import database
 
 
@@ -82,17 +82,10 @@ async def get_file(message: types.Message, state: FSMContext):
     prepare_to_downloading(file_path)
     await bot.download(destination=file_path, file=message.document.file_id)
 
-    try:
-        file = PdfReader(file_path)
-        number_of_pages = len(file.pages)
-        for i in range(number_of_pages):
-            paper_size = file.pages[i]["/MediaBox"]
-            if paper_size != [0, 0, 596, 842]:
-                await message.answer("Я принимаю только файлы с форматом A4")
-                raise PdfReadError
-
-    except PdfReadError:
-        return await message.answer("PDF файл не валиден")
+    number_of_pages = get_number_of_pages(file_path)
+    if not number_of_pages:
+        return await message.answer("Ваш файл не валиден. Я принимю только pdf "
+                                    "с форматом A4.")
 
     await state.update_data(number_of_pages=number_of_pages)
     await state.update_data(file_path=file_path)
@@ -160,5 +153,6 @@ async def pay_way(message: types.Message, state: FSMContext):
     await database.Database().finish_task_creation(task)
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ: {task.id_}",
-                               reply_markup= await admin_keyboard.get_task_keyboard(task.id_))
+                               reply_markup=await
+                               admin_keyboard.get_task_keyboard(task.id_))
     await state.clear()
