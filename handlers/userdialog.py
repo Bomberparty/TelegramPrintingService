@@ -83,7 +83,14 @@ async def get_file(message: types.Message, state: FSMContext):
     await bot.download(destination=file_path, file=message.document.file_id)
 
     try:
-        number_of_pages = len(PdfReader(file_path).pages)
+        file = PdfReader(file_path)
+        number_of_pages = len(file.pages)
+        for i in range(number_of_pages):
+            paper_size = file.pages[i]["/MediaBox"]
+            if paper_size != [0, 0, 596, 842]:
+                await message.answer("Я принимаю только файлы с форматом A4")
+                raise PdfReadError
+
     except PdfReadError:
         return await message.answer("PDF файл не валиден")
 
