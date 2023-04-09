@@ -9,6 +9,7 @@ from keyboards.user_keyboard import *
 from keyboards import admin_keyboard
 from states import CreateTask
 from loader import bot
+from filters import IsAdminFilter, IsAnyAdminsOnShiftFilter
 from utils.shift import Shift
 from utils.utils import prepare_to_downloading
 import database
@@ -23,6 +24,12 @@ async def cancel(message: types.Message, state: FSMContext):
     await state.clear()
     await start(message)
 
+
+@router.message(and_f(StateFilter("*"), IsAnyAdminsOnShiftFilter(False)))
+async def no_admins(message: types.Message, state: FSMContext):
+    await message.answer("Последний админ ушёл, но обещал вернуться =)")
+    if state:
+        await state.clear()
 
 @router.message(or_f(Command("start", "help"),
                      and_f(CreateTask.choose_task, Text("Назад"))))
@@ -122,7 +129,7 @@ async def printing_mode(message: types.Message, state: FSMContext):
 async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
         pay_way = database.PayWay.CARD
-        numbers = Shift.get_active_number()
+        numbers = Shift().get_active_number()
         msg = 'Переведите средства через СБП в банк "Тинькофф" по номер'+ ('у: ' if len(numbers)==1 else 'ам: ')
         for number in numbers:
             msg += ("+7"+str(number) + " или ")
@@ -141,7 +148,7 @@ async def pay_way(message: types.Message, state: FSMContext):
                          data["coast"], data["sides_count"], pay_way,
                          database.TaskStatus.CONFIRMING)
     await database.Database().finish_task_creation(task)
-    for admin_id in Shift.get_active():
+    for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ: {task.id_}",
                                reply_markup= await admin_keyboard.get_task_keyboard(task.id_))
     await state.clear()

@@ -18,6 +18,20 @@ import logging
 router = Router()
 
 
+@router.message(and_f(Command("start_shift"), IsAdminFilter(True)))
+async def start_shift(message: Message):
+    if Shift.start(message.from_user.id):
+        return await message.answer("Вы вышли на смену")
+    await message.answer("Ты идиот?")
+
+
+@router.message(and_f(Command("end_shift"), IsAdminFilter(True)))
+async def finish_shift(message: Message):
+    if Shift.end(message.from_user.id):
+        return await message.answer("Вы успешно ушли со смены. Хорошего отдыха")
+    await message.answer("Дармоед, ты и так уже не работаешь.")
+
+
 @router.callback_query(and_f(AdminTaskCallback.filter(F.action == Actions.CANCEL),
                              AdminTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def cancel_task(callback: CallbackQuery,

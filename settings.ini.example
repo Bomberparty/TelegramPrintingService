@@ -2,5 +2,5 @@
 token = YOUR_TOKEN
 
 [ADMINS]
-admin_id = ADMIN_ID1, ADMIN_ID2
-admin_nspk_number = ADMIN_ID1_NUMBER, ADMIN_ID2_NUMBER
+admin_id = ADMIN_ID1 ADMIN_ID2
+admin_nspk_number = ADMIN_ID1_NUMBER ADMIN_ID2_NUMBER
