@@ -17,6 +17,6 @@ async def get_completing_task_keyboard(id_: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Печать успешно закончилась",
                                      callback_data=TaskCompletingCallback(action=Actions.ACCEPT, task_id=id_).pack()))
-    builder.add(InlineKeyboardButton(text="Печать не закончилась",
+    builder.add(InlineKeyboardButton(text="Печать провалилась",
                                      callback_data=TaskCompletingCallback(action=Actions.CANCEL, task_id=id_).pack()))
     return builder.as_markup()

@@ -61,14 +61,22 @@ async def task_complete(callback: CallbackQuery,
                         callback_data: TaskCompletingCallback):
     task = await Database().get_task(callback_data.task_id)
     await Database().update_task_status(task.id_, TaskStatus.FINISHED)
-    await callback.message.edit_text("Печать завершилась")
+    await callback.message.edit_text(f"Печать заказа № {task.id_} завершилась")
     await bot.send_message(task.user_id, "Печать завершилась")
-    for admin_id in admins:
-        await bot.send_message(admin_id, f"Печать заказа № {task.id_} "
-                                         f"Успешно завершилась. Стоимость: "
-                                         f"{task.coast}")
 
 
-@router.callback_query
+@router.callback_query(
+    and_f(TaskCompletingCallback.filter(F.action == Actions.CANCEL),
+          TaskCompletingStatusFilter(TaskStatus.PENDING)))
+async def task_failed(callback: CallbackQuery,
+                      callback_data: TaskCompletingCallback):
+    task = await Database().get_task(callback_data.task_id)
+    await Database().update_task_status(task.id_, TaskStatus.FAILED)
+    await callback.message.edit_text("Печать провалилась")
+    await bot.send_message(task.user_id, "Печать успешно провалилась. Свяжитесь"
+                                         " с админами из 254 комнаты")
+
+
+@router.callback_query(or_f(TaskCompletingCallback, AdminTaskStatusFilter))
 async def bad_task(callback: CallbackQuery):
     await callback.message.edit_text("Заказ уже завершён, отменён или выполнен")
