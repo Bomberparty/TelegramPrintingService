@@ -3,7 +3,6 @@ from enum import Enum
 import aiosqlite
 
 import loader
-from loader import dbname
 
 
 class TaskType(Enum):
@@ -56,7 +55,7 @@ class Task:
 
 def database_connect(func):
     async def wrapper(*args, **kwargs):
-        async with aiosqlite.connect(loader.dbname) as conn:
+        async with aiosqlite.connect("db.sql") as conn:
             return await func(*args, **kwargs, conn=conn)
 
     return wrapper

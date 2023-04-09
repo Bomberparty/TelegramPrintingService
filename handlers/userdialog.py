@@ -8,7 +8,8 @@ from PyPDF2 import PdfReader
 from keyboards.user_keyboard import *
 from keyboards import admin_keyboard
 from states import CreateTask
-from loader import bot, admins
+from loader import bot
+from utils.shift import Shift
 from utils.utils import prepare_to_downloading
 import database
 
@@ -121,10 +122,16 @@ async def printing_mode(message: types.Message, state: FSMContext):
 async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
         pay_way = database.PayWay.CARD
+        numbers = Shift.get_active_number()
+        msg = 'Переведите средства через СБП в банк "Тинькофф" по номер'+ ('у: ' if len(numbers)==1 else 'ам: ')
+        for number in numbers:
+            msg += ("+7"+str(number) + " или ")
+        await message.answer(msg, reply_markup=get_main_keyboard())
+
     elif message.text == "Наличными при встрече":
         pay_way = database.PayWay.CASH
         await message.answer("Ваш заказ принят к ожиданию. Ожидаем с наличными "
-                             "в комнате 254",
+                             "в комнате 254.",
                              reply_markup=get_main_keyboard())
     else:
         return
@@ -134,7 +141,7 @@ async def pay_way(message: types.Message, state: FSMContext):
                          data["coast"], data["sides_count"], pay_way,
                          database.TaskStatus.CONFIRMING)
     await database.Database().finish_task_creation(task)
-    for admin_id in admins:
+    for admin_id in Shift.get_active():
         await bot.send_message(admin_id, f"Новый заказ: {task.id_}",
                                reply_markup= await admin_keyboard.get_task_keyboard(task.id_))
     await state.clear()

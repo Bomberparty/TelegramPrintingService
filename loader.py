@@ -5,9 +5,9 @@ config = configparser.ConfigParser()
 
 config.read("settings.ini")
 
-admins = list(map(int, config["DEFAULT"]["admins"].split()))
+admins = list(map(int, config["ADMINS"]["admin_id"].split()))
 
-dbname = config["DEFAULT"]["dbname"].split()[0]
+admin_nspk_number = list(map(int, config["ADMINS"]["admin_nspk_number"].split()))
 
 bot = Bot(token=config['DEFAULT']['token'])
 
