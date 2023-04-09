@@ -66,14 +66,6 @@ class Database:
     Параметр confirmed отвечает за подтверждение заказа админом
     Рекомендуется проверять сначала confirmed, а затем pending"""
 
-    _instance = None
-    conn = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
     @database_connect
     async def finish_task_creation(self, task: Task, conn) -> None:
         cursor = \
@@ -136,6 +128,7 @@ class Database:
                                     (id_,))
         result = (await cursor.fetchone())
         return Task(*result)
+
 
 async def main():
     # await Database().init_database()
