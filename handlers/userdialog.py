@@ -25,18 +25,19 @@ async def cancel(message: types.Message, state: FSMContext):
     await start(message)
 
 
-@router.message(and_f(StateFilter("*"), IsAnyAdminsOnShiftFilter(False)))
-async def no_admins(message: types.Message, state: FSMContext):
-    await message.answer("Последний админ ушёл, но обещал вернуться =)")
-    if state:
-        await state.clear()
-
 @router.message(or_f(Command("start", "help"),
                      and_f(CreateTask.choose_task, Text("Назад"))))
 async def start(message: types.Message):
     await message.answer('''Доброго времени суток, дорогой пользователь.\n'''
                          '''Для запуска сервиса нажмите\n"Создать заказ" ''',
                          reply_markup=get_main_keyboard())
+
+
+@router.message(and_f(StateFilter("*"), IsAnyAdminsOnShiftFilter(False)))
+async def no_admins(message: types.Message, state: FSMContext):
+    await message.answer("Последний админ ушёл, но обещал вернуться =)")
+    if state:
+        await state.clear()
 
 
 @router.message(or_f(Text("Создать заказ"),
