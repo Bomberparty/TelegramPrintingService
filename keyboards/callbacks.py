@@ -8,6 +8,11 @@ class Actions(IntEnum):
     ACCEPT = 1
 
 
-class AdminTaskCallback(CallbackData, prefix="admin_task_callback"):
+class AdminTaskCallback(CallbackData, prefix="admin_task"):
+    action: Actions
+    task_id: int
+
+
+class TaskCompletingCallback(CallbackData, prefix="task_completing"):
     action: Actions
     task_id: int
