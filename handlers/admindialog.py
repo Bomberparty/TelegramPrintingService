@@ -33,7 +33,7 @@ async def finish_shift(message: Message):
     await message.answer("Дармоед, ты и так уже не работаешь.")
 
 
-@router.message(Command("gctl"))
+@router.message(and_f(Command("gctl"), IsAdminFilter(True)))
 async def get_confirming_task_list(message: Message):
     tasks = await Database().get_confirming_task_list()
     await message.answer("Список действующих заказов:")
