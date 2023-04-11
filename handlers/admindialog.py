@@ -5,7 +5,8 @@ from aiogram import F
 
 from keyboards.callbacks import AdminTaskCallback, Actions, \
     TaskCompletingCallback
-from keyboards.admin_keyboard import get_completing_task_keyboard
+from keyboards.admin_keyboard import get_completing_task_keyboard, \
+    get_task_keyboard
 from database import Database, TaskStatus
 from loader import bot
 from utils.shift import Shift
@@ -32,6 +33,15 @@ async def finish_shift(message: Message):
     await message.answer("Дармоед, ты и так уже не работаешь.")
 
 
+@router.message(Command("gctl"))
+async def get_confirming_task_list(message: Message):
+    tasks = await Database().get_confirming_task_list()
+    await message.answer("Список действующих заказов:")
+    for id_ in tasks:
+        kb = get_task_keyboard(id_[0])
+        await message.answer(f"Заказ №{id_[0]}", reply_markup=kb)
+
+
 @router.callback_query(and_f(AdminTaskCallback.filter(F.action == Actions.CANCEL),
                              AdminTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def cancel_task(callback: CallbackQuery,
@@ -54,7 +64,7 @@ async def accept_task(callback: CallbackQuery,
     task = await Database().get_task(callback_data.task_id)
     try:
         await callback.message.edit_text(f"Началась печать заказа № {task.id_}",
-                                         reply_markup= await get_completing_task_keyboard(task.id_))
+                                         reply_markup=get_completing_task_keyboard(task.id_))
         await bot.send_message(task.user_id, "Началась печать")
         await print_file(file_path=task.file_path, copies=task.number_of_copies,
                          mode=task.sides_count)

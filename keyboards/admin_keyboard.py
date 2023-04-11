@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.callbacks import AdminTaskCallback, Actions, TaskCompletingCallback
 
 
-async def get_task_keyboard(id_: int) -> InlineKeyboardMarkup:
+def get_task_keyboard(id_: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Разрешить печать",
                                      callback_data=AdminTaskCallback(action=Actions.ACCEPT, task_id=id_).pack()))
@@ -12,7 +12,7 @@ async def get_task_keyboard(id_: int) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-async def get_completing_task_keyboard(id_: int) -> InlineKeyboardMarkup:
+def get_completing_task_keyboard(id_: int) -> InlineKeyboardMarkup:
 
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Печать успешно закончилась",
