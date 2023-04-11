@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import aiosqlite
-
-import loader
+from typing import List, Tuple
 
 
 class TaskType(Enum):
@@ -79,13 +78,11 @@ class Database:
                  task.sides_count.value, task.pay_way.value,
                  task.status.value, task.id_))
         await conn.commit()
-        await cursor.close()
 
     @database_connect
     async def get_new_id(self, conn) -> int:
         cursor = await conn.execute("SELECT MAX(id) FROM tasks")
         result = (await cursor.fetchone())[0]
-        await cursor.close()
         return (result if result is not None else -1) + 1
 
     @database_connect
@@ -96,7 +93,6 @@ class Database:
                                     (id_, user_id,
                                      TaskStatus.CREATION.value))
         await conn.commit()
-        await cursor.close()
         return id_
 
     @database_connect
@@ -105,14 +101,12 @@ class Database:
         cursor = await conn.execute("UPDATE tasks SET status=? WHERE "
                                     "id=?", (new_status.value, id_))
         await conn.commit()
-        await cursor.close()
 
     @database_connect
     async def get_task_status(self, id_: int, conn) -> TaskStatus:
         cursor = await conn.execute("SELECT status FROM tasks WHERE "
                                     "id=?", (id_,))
         result = (await cursor.fetchone())[0]
-        await cursor.close()
         return TaskStatus(result)
 
     @database_connect
@@ -120,25 +114,32 @@ class Database:
         cursor = await conn.execute("""SELECT user_id FROM tasks WHERE \
                                             id=?""", (id_,))
         result = (await cursor.fetchone())[0]
-        await cursor.close()
         return result
 
     @database_connect
     async def get_task(self, id_: int, conn) -> Task:
         cursor = await conn.execute("""SELECT * FROM tasks WHERE id=?""",
                                     (id_,))
-        result = (await cursor.fetchone())
+        result = await cursor.fetchone()
         return Task(*result)
+
+    @database_connect
+    async def get_confirming_task_list(self, conn) -> List[Tuple[int]]:
+        cursor = await conn.execute("""SELECT id FROM tasks WHERE \
+        status=?;""", (TaskStatus.CONFIRMING.value, ))
+        result = await cursor.fetchall()
+        return result
 
 
 async def main():
-    # await Database().init_database()
-    await Database().create_new_task(123)
+    a = await Database().get_confirming_task_list()
+    print(a)
+    # await Database().create_new_task(123)
     # task = Task(0, 200, TaskType.PRINT_TASK, "1.pdf", 1, 5,
     # SidesCount.ONE, PayWay.CARD, TaskStatus.PENDING)
     # await Database().finish_task_creation(task)
     # print(await Database().create_new_task())
-    print(await Database().get_task(16))
+    # print(await Database().get_task(16))
 
 
 if __name__ == "__main__":

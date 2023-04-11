@@ -153,6 +153,5 @@ async def pay_way(message: types.Message, state: FSMContext):
     await database.Database().finish_task_creation(task)
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ: {task.id_}",
-                               reply_markup=await
-                               admin_keyboard.get_task_keyboard(task.id_))
+                               reply_markup=admin_keyboard.get_task_keyboard(task.id_))
     await state.clear()
