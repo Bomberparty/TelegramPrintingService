@@ -37,6 +37,6 @@ async def no_admins(message: types.Message, state: FSMContext):
                      and_f(PrintTask.send_file, Text("Назад"))))
 async def create_task(message: types.Message, state: FSMContext):
     await message.answer("Выберите вид заказа",
-                         reply_markup=get_task_keyboard())
+                         reply_markup=get_choosing_task_keyboard())
     await state.set_state(ChooseTask.step)
 

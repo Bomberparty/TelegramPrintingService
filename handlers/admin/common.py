@@ -2,7 +2,7 @@ from aiogram.dispatcher.router import Router
 from aiogram.filters import Command, and_f
 from aiogram.types import Message
 
-from keyboards.admin_keyboard import get_task_keyboard
+from keyboards.admin_keyboard import get_print_task_keyboard
 from database import Database
 from utils.shift import Shift
 from filters import IsAdminFilter
@@ -29,5 +29,5 @@ async def get_confirming_task_list(message: Message):
     tasks = await Database().get_confirming_task_list()
     await message.answer("Список действующих заказов:")
     for id_ in tasks:
-        kb = get_task_keyboard(id_[0])
+        kb = get_print_task_keyboard(id_[0])
         await message.answer(f"Заказ №{id_[0]}", reply_markup=kb)

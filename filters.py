@@ -1,11 +1,11 @@
 from aiogram.filters.base import Filter
-from aiogram.filters.callback_data import CallbackData
 from aiogram.types import Message, CallbackQuery
 
 from loader import admins
 from utils.shift import Shift
-from keyboards.callbacks import AdminTaskCallback, TaskCompletingCallback
-from database import Database, TaskStatus
+from keyboards.callbacks import AdminPrintTaskCallback,\
+    PrintTaskCompletingCallback
+from database import Database
 
 
 class IsAdminFilter(Filter):
@@ -28,9 +28,9 @@ class AdminTaskStatusFilter(Filter):
     def __init__(self, *args):
         self.statuses = args
 
-    async def __call__(self, callback_query: CallbackQuery) -> bool:
+    async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
         db = Database()
-        data = AdminTaskCallback.unpack(callback_query.data)
+        data = AdminPrintTaskCallback.unpack(callback_query.data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses
 
@@ -39,8 +39,8 @@ class TaskCompletingStatusFilter(Filter):
     def __init__(self, *args):
         self.statuses = args
 
-    async def __call__(self, callback_query: CallbackQuery) -> bool:
+    async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
         db = Database()
-        data = TaskCompletingCallback.unpack(callback_query.data)
+        data = PrintTaskCompletingCallback.unpack(callback_query.data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses
