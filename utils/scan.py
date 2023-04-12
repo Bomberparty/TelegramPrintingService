@@ -21,5 +21,3 @@ async def get_convert_command(old_path, new_path) -> str:
 async def scan_file(task_id: int, scan_id: int, format_: str) -> str:
     format1 = "png" if format_ == "pdf" else format_
     file_path = path.join("media", "scan", f"{task_id}_{scan_id}.{format_}")
-
-
