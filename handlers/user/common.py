@@ -1,11 +1,11 @@
-from aiogram import types, F
+from aiogram import types
 from aiogram.dispatcher.router import Router
 from aiogram.filters import Command, Text, or_f, and_f, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from keyboards.user_keyboard import *
-from states import PrintTask, ChooseTask, ScanTask
-from filters import IsAdminFilter, IsAnyAdminsOnShiftFilter
+from states import PrintTask, ChooseTask
+from filters import IsAnyAdminsOnShiftFilter
 
 
 router = Router()
