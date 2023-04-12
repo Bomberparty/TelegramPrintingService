@@ -4,7 +4,7 @@ from aiogram.filters import Command, Text, or_f, and_f, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from keyboards.user_keyboard import *
-from states import CreateTask
+from states import PrintTask, ChooseTask, ScanTask
 from filters import IsAdminFilter, IsAnyAdminsOnShiftFilter
 
 
@@ -19,7 +19,7 @@ async def cancel(message: types.Message, state: FSMContext):
 
 
 @router.message(or_f(Command("start", "help"),
-                     and_f(CreateTask.choose_task, Text("Назад"))))
+                     and_f(ChooseTask.step, Text("Назад"))))
 async def start(message: types.Message):
     await message.answer('''Доброго времени суток, дорогой пользователь.\n'''
                          '''Для запуска сервиса нажмите\n"Создать заказ" ''',
@@ -34,9 +34,9 @@ async def no_admins(message: types.Message, state: FSMContext):
 
 
 @router.message(or_f(Text("Создать заказ"),
-                     and_f(CreateTask.send_file, Text("Назад"))))
+                     and_f(PrintTask.send_file, Text("Назад"))))
 async def create_task(message: types.Message, state: FSMContext):
     await message.answer("Выберите вид заказа",
                          reply_markup=get_task_keyboard())
-    await state.set_state(CreateTask.choose_task)
+    await state.set_state(ChooseTask.step)
 

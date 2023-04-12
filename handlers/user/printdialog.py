@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.user_keyboard import *
 from keyboards import admin_keyboard
-from states import CreateTask
+from states import PrintTask, ChooseTask
 from loader import bot
 from utils.shift import Shift
 from utils.utils import prepare_to_downloading, get_number_of_pages
@@ -15,14 +15,14 @@ import database
 router = Router()
 
 
-@router.message(CreateTask.number_of_copies, Text("Назад"))
+@router.message(PrintTask.number_of_copies, Text("Назад"))
 async def require_file(message: types.Message, state: FSMContext):
     await message.answer("Отправьте документ",
                          reply_markup=get_simple_keyboard())
-    await state.set_state(CreateTask.send_file)
+    await state.set_state(PrintTask.send_file)
 
 
-@router.message(and_f(CreateTask.choose_task, Text("Печать")))
+@router.message(and_f(ChooseTask.step, Text("Печать")))
 async def get_task_type(message: types.Message, state: FSMContext):
     id_ = await database.Database().create_new_task(message.from_user.id)
     await state.update_data(task_type=database.TaskType.PRINT_TASK)
@@ -30,15 +30,15 @@ async def get_task_type(message: types.Message, state: FSMContext):
     await require_file(message, state)
 
 
-@router.message(CreateTask.choose_printing_mode, Text("Назад"))
+@router.message(PrintTask.choose_printing_mode, Text("Назад"))
 async def require_number_of_copies(message: types.Message, state: FSMContext):
     await message.answer("Напишите в чат необходимое вам количество "
                          "копий документа",
                          reply_markup=get_simple_keyboard())
-    await state.set_state(CreateTask.number_of_copies)
+    await state.set_state(PrintTask.number_of_copies)
 
 
-@router.message(CreateTask.send_file)
+@router.message(PrintTask.send_file)
 async def get_file(message: types.Message, state: FSMContext):
     if message.content_type != types.ContentType.DOCUMENT:
         return await message.answer("Ваше сообщение не содержит документа")
@@ -59,21 +59,21 @@ async def get_file(message: types.Message, state: FSMContext):
     await require_number_of_copies(message, state)
 
 
-@router.message(CreateTask.choose_pay_way, Text("Назад"))
+@router.message(PrintTask.choose_pay_way, Text("Назад"))
 async def require_printing_mode(message: types.Message, state: FSMContext):
     await message.answer("Выберите режим печати",
                          reply_markup=get_printing_method_kb())
-    await state.set_state(CreateTask.choose_printing_mode)
+    await state.set_state(PrintTask.choose_printing_mode)
 
 
-@router.message(CreateTask.number_of_copies, F.text.regexp(r'\d+'))
+@router.message(PrintTask.number_of_copies, F.text.regexp(r'\d+'))
 async def get_copies(message: types.Message, state: FSMContext):
     await state.update_data(number_of_copies=int(message.text))
 
     await require_printing_mode(message, state)
 
 
-@router.message(CreateTask.choose_printing_mode)
+@router.message(PrintTask.choose_printing_mode)
 async def printing_mode(message: types.Message, state: FSMContext):
     if message.text == "Одностороння печать":
         sides_count = database.SidesCount.ONE
@@ -90,10 +90,10 @@ async def printing_mode(message: types.Message, state: FSMContext):
     await message.answer(f'''Стоимость заказа составляет {coast} рублей. 
     Теперь выберите удобный для вас метод оплаты''',
                          reply_markup=pay_way_keyboard())
-    await state.set_state(CreateTask.choose_pay_way)
+    await state.set_state(PrintTask.choose_pay_way)
 
 
-@router.message(CreateTask.choose_pay_way)
+@router.message(PrintTask.choose_pay_way)
 async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
         pay_way = database.PayWay.CARD
