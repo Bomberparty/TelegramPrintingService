@@ -12,7 +12,7 @@ def get_main_keyboard() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-def get_task_keyboard() -> ReplyKeyboardMarkup:
+def get_choosing_task_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="Печать"), KeyboardButton(text="Сканирование")],
         [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]

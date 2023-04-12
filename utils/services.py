@@ -27,7 +27,7 @@ async def register_services():
 
 
 async def main():
-    await delete_old_files()
+    await cancel_old_tasks()
 
 
 if __name__ == "__main__":

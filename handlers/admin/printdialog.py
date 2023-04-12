@@ -1,17 +1,15 @@
 from aiogram.dispatcher.router import Router
-from aiogram.filters import Command, Text, or_f, and_f, StateFilter
-from aiogram.types import Message, CallbackQuery
+from aiogram.filters import or_f, and_f
+from aiogram.types import CallbackQuery
 from aiogram import F
 
-from keyboards.callbacks import AdminTaskCallback, Actions, \
-    TaskCompletingCallback
-from keyboards.admin_keyboard import get_completing_task_keyboard, \
-    get_task_keyboard
+from keyboards.callbacks import AdminPrintTaskCallback, Actions, \
+    PrintTaskCompletingCallback
+from keyboards.admin_keyboard import get_print_completing_task_keyboard
 from database import Database, TaskStatus
 from loader import bot
 from utils.shift import Shift
-from filters import AdminTaskStatusFilter, IsAdminFilter,\
-    TaskCompletingStatusFilter
+from filters import AdminTaskStatusFilter, TaskCompletingStatusFilter
 from utils.print import print_file, PrintException
 
 import logging
@@ -19,33 +17,10 @@ import logging
 router = Router()
 
 
-@router.message(and_f(Command("start_shift"), IsAdminFilter(True)))
-async def start_shift(message: Message):
-    if Shift.start(message.from_user.id):
-        return await message.answer("Вы вышли на смену")
-    await message.answer("Ты идиот?")
-
-
-@router.message(and_f(Command("end_shift"), IsAdminFilter(True)))
-async def finish_shift(message: Message):
-    if Shift.end(message.from_user.id):
-        return await message.answer("Вы успешно ушли со смены. Хорошего отдыха")
-    await message.answer("Дармоед, ты и так уже не работаешь.")
-
-
-@router.message(and_f(Command("gctl"), IsAdminFilter(True)))
-async def get_confirming_task_list(message: Message):
-    tasks = await Database().get_confirming_task_list()
-    await message.answer("Список действующих заказов:")
-    for id_ in tasks:
-        kb = get_task_keyboard(id_[0])
-        await message.answer(f"Заказ №{id_[0]}", reply_markup=kb)
-
-
-@router.callback_query(and_f(AdminTaskCallback.filter(F.action == Actions.CANCEL),
+@router.callback_query(and_f(AdminPrintTaskCallback.filter(F.action == Actions.CANCEL),
                              AdminTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def cancel_task(callback: CallbackQuery,
-                      callback_data: AdminTaskCallback):
+                      callback_data: AdminPrintTaskCallback):
     db = Database()
     message = f"Заказ №{callback_data.task_id} отменён."
     await db.update_task_status(callback_data.task_id, TaskStatus.CANCELED)
@@ -57,14 +32,14 @@ async def cancel_task(callback: CallbackQuery,
     await bot.send_message(user_id, f"Ваш заказ был отменён злым админом.")
 
 
-@router.callback_query(and_f(AdminTaskCallback.filter(F.action == Actions.ACCEPT),
+@router.callback_query(and_f(AdminPrintTaskCallback.filter(F.action == Actions.ACCEPT),
                              AdminTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def accept_task(callback: CallbackQuery,
-                      callback_data: AdminTaskCallback):
+                      callback_data: AdminPrintTaskCallback):
     task = await Database().get_task(callback_data.task_id)
     try:
         await callback.message.edit_text(f"Началась печать заказа № {task.id_}",
-                                         reply_markup=get_completing_task_keyboard(task.id_))
+                                         reply_markup=get_print_completing_task_keyboard(task.id_))
         await bot.send_message(task.user_id, "Началась печать")
         await print_file(file_path=task.file_path, copies=task.number_of_copies,
                          mode=task.sides_count)
@@ -80,10 +55,10 @@ async def accept_task(callback: CallbackQuery,
 
 
 @router.callback_query(
-    and_f(TaskCompletingCallback.filter(F.action == Actions.ACCEPT),
+    and_f(PrintTaskCompletingCallback.filter(F.action == Actions.ACCEPT),
           TaskCompletingStatusFilter(TaskStatus.PENDING)))
 async def task_complete(callback: CallbackQuery,
-                        callback_data: TaskCompletingCallback):
+                        callback_data: PrintTaskCompletingCallback):
     task = await Database().get_task(callback_data.task_id)
     await Database().update_task_status(task.id_, TaskStatus.FINISHED)
     await callback.message.edit_text(f"Печать заказа № {task.id_} завершилась")
@@ -91,10 +66,10 @@ async def task_complete(callback: CallbackQuery,
 
 
 @router.callback_query(
-    and_f(TaskCompletingCallback.filter(F.action == Actions.CANCEL),
+    and_f(PrintTaskCompletingCallback.filter(F.action == Actions.CANCEL),
           TaskCompletingStatusFilter(TaskStatus.PENDING)))
 async def task_failed(callback: CallbackQuery,
-                      callback_data: TaskCompletingCallback):
+                      callback_data: PrintTaskCompletingCallback):
     task = await Database().get_task(callback_data.task_id)
     await Database().update_task_status(task.id_, TaskStatus.FAILED)
     await callback.message.edit_text("Печать провалилась")
@@ -102,6 +77,7 @@ async def task_failed(callback: CallbackQuery,
                                          " с админами из 254 комнаты")
 
 
-@router.callback_query(or_f(TaskCompletingCallback, AdminTaskStatusFilter))
+@router.callback_query(PrintTaskCompletingCallback)
+@router.callback_query(AdminTaskStatusFilter)
 async def bad_task(callback: CallbackQuery):
     await callback.message.edit_text("Заказ уже завершён, отменён или выполнен")
