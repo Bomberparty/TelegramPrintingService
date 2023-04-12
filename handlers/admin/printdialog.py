@@ -77,6 +77,7 @@ async def task_failed(callback: CallbackQuery,
                                          " с админами из 254 комнаты")
 
 
-@router.callback_query(or_f(PrintTaskCompletingCallback, AdminTaskStatusFilter))
+@router.callback_query(PrintTaskCompletingCallback)
+@router.callback_query(AdminTaskStatusFilter)
 async def bad_task(callback: CallbackQuery):
     await callback.message.edit_text("Заказ уже завершён, отменён или выполнен")
