@@ -46,3 +46,12 @@ def get_simple_keyboard() -> ReplyKeyboardMarkup:
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
+
+
+def get_format_keyboard() -> ReplyKeyboardMarkup:
+    kb = [
+        [KeyboardButton(text="pdf"), KeyboardButton(text="png")],
+        [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
+    ]
+    keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+    return keyboard
