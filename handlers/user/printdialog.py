@@ -115,10 +115,10 @@ async def pay_way(message: types.Message, state: FSMContext):
     data = await state.get_data()
     task = database.Task(data["id"], message.from_user.id, data["task_type"],
                          data["file_path"], data["number_of_copies"],
-                         data["coast"], data["sides_count"], pay_way,
+                         data["coast"], data["sides_count"], None, pay_way,
                          database.TaskStatus.CONFIRMING)
-    await database.Database().finish_task_creation(task)
+    await database.Database().finish_print_task_creation(task)
     for admin_id in Shift().get_active():
-        await bot.send_message(admin_id, f"Новый заказ: {task.id_}",
-                               reply_markup=admin_keyboard.get_print_task_keyboard(task.id_))
+        await bot.send_message(admin_id, f"Новый заказ печать№ {task.id_}",
+                               reply_markup=admin_keyboard.get_scan_task_keyboard(task.id_))
     await state.clear()

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import aiosqlite
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 class TaskType(Enum):
@@ -12,6 +12,11 @@ class TaskType(Enum):
 class SidesCount(Enum):
     ONE = "one-sided"
     TWO = "two-sided-long-edge"
+
+
+class Format(Enum):
+    PNG = "png"
+    PDF = "pdf"
 
 
 class PayWay(Enum):
@@ -33,10 +38,11 @@ class Task:
     id_: int
     user_id: int
     task_type: TaskType
-    file_path: str
+    file_path: Union[str, None]
     number_of_copies: int
     coast: int
-    sides_count: SidesCount
+    sides_count: Union[SidesCount, None]
+    format: Union[Format, None]
     pay_way: PayWay
     status: TaskStatus
 
@@ -46,6 +52,8 @@ class Task:
             self.task_type = TaskType(self.task_type)
         if isinstance(self.sides_count, str):
             self.sides_count = SidesCount(self.sides_count)
+        if isinstance(self.format, str):
+            self.format = Format(self.format)
         if isinstance(self.pay_way, str):
             self.pay_way = PayWay(self.pay_way)
         if isinstance(self.status, str):
@@ -67,7 +75,7 @@ class Database:
     Рекомендуется проверять сначала confirmed, а затем pending"""
 
     @database_connect
-    async def finish_task_creation(self, task: Task, conn) -> None:
+    async def finish_print_task_creation(self, task: Task, conn) -> None:
         cursor = \
             await conn.execute(
                 "UPDATE tasks SET task_type=?, file_path=?, number_of_copies=?,"
@@ -77,6 +85,17 @@ class Database:
                  task.number_of_copies, task.coast,
                  task.sides_count.value, task.pay_way.value,
                  task.status.value, task.id_))
+        await conn.commit()
+
+    @database_connect
+    async def finish_scan_task_creation(self, task: Task, conn) -> None:
+        cursor = \
+            await conn.execute(
+                "UPDATE tasks SET task_type=?, number_of_copies=?,"
+                " coast=?, format=?, pay_way=?, status=? WHERE id=?",
+                (task.task_type.value, task.number_of_copies, task.coast,
+                 task.format.value, task.pay_way.value, task.status.value,
+                 task.id_))
         await conn.commit()
 
     @database_connect
@@ -124,9 +143,10 @@ class Database:
         return Task(*result)
 
     @database_connect
-    async def get_confirming_task_list(self, conn) -> List[Tuple[int]]:
+    async def get_confirming_task_list(self, task_type: TaskType, conn)\
+            -> List[Tuple[int]]:
         cursor = await conn.execute("""SELECT id FROM tasks WHERE \
-        status=?;""", (TaskStatus.CONFIRMING.value, ))
+        status=? AND task_type=?;""", (TaskStatus.CONFIRMING.value, task_type.value))
         result = await cursor.fetchall()
         return result
 

@@ -13,6 +13,7 @@ class PrintTask(StatesGroup):
 
 
 class ScanTask(StatesGroup):
-    number_of_scans = State()
+    number_of_documents = State()
+    choose_format = State()
     choose_pay_way = State()
 

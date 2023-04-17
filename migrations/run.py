@@ -16,7 +16,7 @@ def _get_files():
 def _run_migration(file_path):
     # Тут просто читаем файл и передаём его как стейтмент
 
-    con = sqlite3.connect("db.sql")
+    con = sqlite3.connect("database.db")
     cur = con.cursor()
     with open(file_path, 'r') as f:
         stmt = f.read().replace('\n', ' ')

@@ -16,3 +16,14 @@ class AdminPrintTaskCallback(CallbackData, prefix="admin_print"):
 class PrintTaskCompletingCallback(CallbackData, prefix="print_completing"):
     action: Actions
     task_id: int
+
+
+class AdminScanTaskCallback(CallbackData, prefix="admin_scan"):
+    action: Actions
+    task_id: int
+
+
+class ScanningCallback(CallbackData, prefix="scanning"):
+    action: Actions
+    task_id: int
+    index: int

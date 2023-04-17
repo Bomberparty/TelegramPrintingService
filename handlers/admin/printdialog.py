@@ -9,7 +9,7 @@ from keyboards.admin_keyboard import get_print_completing_task_keyboard
 from database import Database, TaskStatus
 from loader import bot
 from utils.shift import Shift
-from filters import AdminTaskStatusFilter, TaskCompletingStatusFilter
+from filters import AdminPrintTaskStatusFilter, TaskCompletingStatusFilter
 from utils.print import print_file, PrintException
 
 import logging
@@ -17,23 +17,8 @@ import logging
 router = Router()
 
 
-@router.callback_query(and_f(AdminPrintTaskCallback.filter(F.action == Actions.CANCEL),
-                             AdminTaskStatusFilter(TaskStatus.CONFIRMING)))
-async def cancel_task(callback: CallbackQuery,
-                      callback_data: AdminPrintTaskCallback):
-    db = Database()
-    message = f"Заказ №{callback_data.task_id} отменён."
-    await db.update_task_status(callback_data.task_id, TaskStatus.CANCELED)
-    await callback.message.edit_text(message)
-    user_id = await db.get_user_id_by_task_id(callback_data.task_id)
-    for admin_id in Shift.get_active():
-        if admin_id != callback.from_user.id:
-            await bot.send_message(admin_id, message)
-    await bot.send_message(user_id, f"Ваш заказ был отменён злым админом.")
-
-
 @router.callback_query(and_f(AdminPrintTaskCallback.filter(F.action == Actions.ACCEPT),
-                             AdminTaskStatusFilter(TaskStatus.CONFIRMING)))
+                             AdminPrintTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def accept_task(callback: CallbackQuery,
                       callback_data: AdminPrintTaskCallback):
     task = await Database().get_task(callback_data.task_id)
@@ -78,6 +63,6 @@ async def task_failed(callback: CallbackQuery,
 
 
 @router.callback_query(PrintTaskCompletingCallback)
-@router.callback_query(AdminTaskStatusFilter)
+@router.callback_query(AdminPrintTaskStatusFilter)
 async def bad_task(callback: CallbackQuery):
     await callback.message.edit_text("Заказ уже завершён, отменён или выполнен")

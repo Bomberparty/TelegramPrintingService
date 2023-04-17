@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery
 from loader import admins
 from utils.shift import Shift
 from keyboards.callbacks import AdminPrintTaskCallback,\
-    PrintTaskCompletingCallback
+    PrintTaskCompletingCallback, AdminScanTaskCallback
 from database import Database
 
 
@@ -24,13 +24,24 @@ class IsAnyAdminsOnShiftFilter(Filter):
         return (True if len(Shift.get_active()) else False) == self.flag
 
 
-class AdminTaskStatusFilter(Filter):
+class AdminPrintTaskStatusFilter(Filter):
     def __init__(self, *args):
         self.statuses = args
 
     async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
         db = Database()
         data = AdminPrintTaskCallback.unpack(callback_query.data)
+        status = await db.get_task_status(data.task_id)
+        return status in self.statuses
+
+
+class AdminScanTaskStatusFilter(Filter):
+    def __init__(self, *args):
+        self.statuses = args
+
+    async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
+        db = Database()
+        data = AdminScanTaskCallback.unpack(callback_query.data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses
 
