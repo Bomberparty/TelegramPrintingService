@@ -3,8 +3,9 @@ from aiogram.dispatcher.router import Router
 from aiogram.filters import Command, and_f
 from aiogram.types import Message, CallbackQuery
 
-from keyboards.admin_keyboard import get_print_task_keyboard
-from database import Database, TaskStatus
+from keyboards.admin_keyboard import get_print_task_keyboard, \
+    get_scan_task_keyboard
+from database import Database, TaskStatus, TaskType
 from keyboards.callbacks import AdminPrintTaskCallback, Actions, \
     AdminScanTaskCallback
 from loader import bot
@@ -29,12 +30,21 @@ async def finish_shift(message: Message):
     await message.answer("Дармоед, ты и так уже не работаешь.")
 
 
-@router.message(and_f(Command("gctl"), IsAdminFilter(True)))
+@router.message(and_f(Command("gcptl"), IsAdminFilter(True)))
 async def get_confirming_task_list(message: Message):
-    tasks = await Database().get_confirming_task_list()
-    await message.answer("Список действующих заказов:")
+    tasks = await Database().get_confirming_task_list(TaskType.PRINT_TASK)
+    await message.answer("Список действующих заказов на печать:")
     for id_ in tasks:
         kb = get_print_task_keyboard(id_[0])
+        await message.answer(f"Заказ №{id_[0]}", reply_markup=kb)
+
+
+@router.message(and_f(Command("gcstl"), IsAdminFilter(True)))
+async def get_confirming_task_list(message: Message):
+    tasks = await Database().get_confirming_task_list(TaskType.SCAN_TASK)
+    await message.answer("Список действующих заказов на сканирование:")
+    for id_ in tasks:
+        kb = get_scan_task_keyboard(id_[0])
         await message.answer(f"Заказ №{id_[0]}", reply_markup=kb)
 
 

@@ -143,9 +143,10 @@ class Database:
         return Task(*result)
 
     @database_connect
-    async def get_confirming_task_list(self, conn) -> List[Tuple[int]]:
+    async def get_confirming_task_list(self, task_type: TaskType, conn)\
+            -> List[Tuple[int]]:
         cursor = await conn.execute("""SELECT id FROM tasks WHERE \
-        status=?;""", (TaskStatus.CONFIRMING.value, ))
+        status=? AND task_type=?;""", (TaskStatus.CONFIRMING.value, task_type.value))
         result = await cursor.fetchall()
         return result
 
