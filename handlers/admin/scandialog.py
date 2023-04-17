@@ -38,7 +38,7 @@ async def scan_page(callback: CallbackQuery, callback_data: ScanningCallback):
     file_path = await scan_file(task.id_, callback_data.index, task.format)
     await bot.send_document(f"Страница №{callback_data.index}", file_path)
     if task.number_of_copies == callback_data.index:
-        await bot.send_message(f"Сканированик №{task.id_} завершилось. "
+        await bot.send_message(task.user_id, f"Сканированик №{task.id_} завершилось. "
                                f"Приходите ещё")
         await callback.message.edit_text(f"Сканирование заказа №{task.id_} "
                                          f"завершилось.", reply_markup=None)
