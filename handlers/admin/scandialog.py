@@ -1,7 +1,7 @@
 from aiogram.dispatcher.router import Router
 from aiogram.filters import or_f, and_f
 from aiogram.types import CallbackQuery
-from aiogram import F
+from aiogram import F, types
 
 from keyboards.callbacks import AdminPrintTaskCallback, Actions, \
     PrintTaskCompletingCallback, AdminScanTaskCallback, ScanningCallback
@@ -37,7 +37,7 @@ async def scan_page(callback: CallbackQuery, callback_data: ScanningCallback):
     task = await Database().get_task(callback_data.task_id)
     file_path = await scan_file(task.id_, callback_data.index, task.format)
     await bot.send_message(task.user_id, f"Страница №{callback_data.index}")
-    await bot.send_document(task.user_id, file_path)
+    await bot.send_document(task.user_id, types.InputFile(file_path))
     if task.number_of_copies == callback_data.index:
         await bot.send_message(task.user_id, f"Сканированик №{task.id_} завершилось. "
                                f"Приходите ещё")
