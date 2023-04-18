@@ -14,6 +14,7 @@ from utils.shift import Shift
 router = Router()
 
 
+@router.message(ScanTask.choose_format, Text("Назад"))
 async def require_number_of_documents(message: types.Message, state: FSMContext):
     await message.answer("Напишите в чат необходимое вам количество "
                          "копий документа",
@@ -29,6 +30,7 @@ async def get_task_type(message: types.Message, state: FSMContext):
     await require_number_of_documents(message, state)
 
 
+@router.message(and_f(ScanTask.choose_pay_way, Text("Назад")))
 async def require_format(message: types.Message, state: FSMContext):
     await message.answer("Выберите формат изображения",
                          reply_markup=get_format_keyboard())
