@@ -24,7 +24,7 @@ async def require_number_of_documents(message: types.Message, state: FSMContext)
 
 @router.message(and_f(ChooseTask.step, Text("Сканирование")))
 async def get_task_type(message: types.Message, state: FSMContext):
-    id_ = await database.Database().create_new_task(message.from_user.id)
+    id_ = await database.TaskDB().create_new_task(message.from_user.id)
     await state.update_data(task_type=database.TaskType.SCAN_TASK)
     await state.update_data(id=id_)
     await require_number_of_documents(message, state)
@@ -81,7 +81,7 @@ async def pay_way(message: types.Message, state: FSMContext):
                          coast=data["coast"], sides_count=None,
                          format=data["format"], pay_way=pay_way,
                          status=database.TaskStatus.CONFIRMING)
-    await database.Database().finish_scan_task_creation(task)
+    await database.TaskDB().finish_scan_task_creation(task)
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ печати №: {task.id_}",
                                reply_markup=admin_keyboard.get_scan_task_keyboard(task.id_))

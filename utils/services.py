@@ -7,7 +7,7 @@ import aioschedule
 
 
 async def cancel_old_tasks():
-    id_list = await database.Database().get_confirming_task_list()
+    id_list = await database.TaskDB().get_confirming_task_list()
     directory = "media/"
     for task_id in id_list:
         file_path = os.path.join(directory, f"{task_id[0]}.pdf")
@@ -15,7 +15,7 @@ async def cancel_old_tasks():
         time = (datetime.datetime.utcnow() -
                 datetime.datetime.utcfromtimestamp(a)).seconds
         if time > 24 * 60 * 60:
-            await database.Database().\
+            await database.TaskDB().\
                 update_task_status(database.TaskStatus.CANCELED)
 
 

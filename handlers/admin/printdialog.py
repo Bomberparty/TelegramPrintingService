@@ -6,7 +6,7 @@ from aiogram import F
 from keyboards.callbacks import AdminPrintTaskCallback, Actions, \
     PrintTaskCompletingCallback
 from keyboards.admin_keyboard import get_print_completing_task_keyboard
-from database import Database, TaskStatus
+from database import TaskDB, TaskStatus
 from loader import bot
 from utils.shift import Shift
 from filters import AdminPrintTaskStatusFilter, TaskCompletingStatusFilter
@@ -21,20 +21,20 @@ router = Router()
                              AdminPrintTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def accept_task(callback: CallbackQuery,
                       callback_data: AdminPrintTaskCallback):
-    task = await Database().get_task(callback_data.task_id)
+    task = await TaskDB().get_task(callback_data.task_id)
     try:
         await callback.message.edit_text(f"Началась печать заказа № {task.id_}",
                                          reply_markup=get_print_completing_task_keyboard(task.id_))
         await bot.send_message(task.user_id, "Началась печать")
         await print_file(file_path=task.file_path, copies=task.number_of_copies,
                          mode=task.sides_count)
-        await Database().update_task_status(task.id_, TaskStatus.PENDING)
+        await TaskDB().update_task_status(task.id_, TaskStatus.PENDING)
     except PrintException as ex:
         logging.exception(ex)
         await callback.message.edit_text(f"Печать заказа № {task.id_}"
                                          f" провалилась")
         await bot.send_message(task.user_id, "Печать провалилась")
-        await Database().update_task_status(task.id_, TaskStatus.FAILED)
+        await TaskDB().update_task_status(task.id_, TaskStatus.FAILED)
     except Exception as ex:
         logging.exception(ex)
 
@@ -44,8 +44,8 @@ async def accept_task(callback: CallbackQuery,
           TaskCompletingStatusFilter(TaskStatus.PENDING)))
 async def task_complete(callback: CallbackQuery,
                         callback_data: PrintTaskCompletingCallback):
-    task = await Database().get_task(callback_data.task_id)
-    await Database().update_task_status(task.id_, TaskStatus.FINISHED)
+    task = await TaskDB().get_task(callback_data.task_id)
+    await TaskDB().update_task_status(task.id_, TaskStatus.FINISHED)
     await callback.message.edit_text(f"Печать заказа № {task.id_} завершилась")
     await bot.send_message(task.user_id, "Печать завершилась")
 
@@ -55,8 +55,8 @@ async def task_complete(callback: CallbackQuery,
           TaskCompletingStatusFilter(TaskStatus.PENDING)))
 async def task_failed(callback: CallbackQuery,
                       callback_data: PrintTaskCompletingCallback):
-    task = await Database().get_task(callback_data.task_id)
-    await Database().update_task_status(task.id_, TaskStatus.FAILED)
+    task = await TaskDB().get_task(callback_data.task_id)
+    await TaskDB().update_task_status(task.id_, TaskStatus.FAILED)
     await callback.message.edit_text("Печать провалилась")
     await bot.send_message(task.user_id, "Печать успешно провалилась. Свяжитесь"
                                          " с админами из 254 комнаты")

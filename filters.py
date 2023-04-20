@@ -5,7 +5,7 @@ from loader import admins
 from utils.shift import Shift
 from keyboards.callbacks import AdminPrintTaskCallback,\
     PrintTaskCompletingCallback, AdminScanTaskCallback
-from database import Database
+from database import TaskDB
 
 
 class IsAdminFilter(Filter):
@@ -29,7 +29,7 @@ class AdminPrintTaskStatusFilter(Filter):
         self.statuses = args
 
     async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
-        db = Database()
+        db = TaskDB()
         data = AdminPrintTaskCallback.unpack(callback_query.data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses
@@ -40,7 +40,7 @@ class AdminScanTaskStatusFilter(Filter):
         self.statuses = args
 
     async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
-        db = Database()
+        db = TaskDB()
         data = AdminScanTaskCallback.unpack(callback_query.data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses
@@ -51,7 +51,7 @@ class TaskCompletingStatusFilter(Filter):
         self.statuses = args
 
     async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
-        db = Database()
+        db = TaskDB()
         data = PrintTaskCompletingCallback.unpack(callback_query.data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses

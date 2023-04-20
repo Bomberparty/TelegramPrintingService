@@ -24,7 +24,7 @@ async def require_file(message: types.Message, state: FSMContext):
 
 @router.message(and_f(ChooseTask.step, Text("Печать")))
 async def get_task_type(message: types.Message, state: FSMContext):
-    id_ = await database.Database().create_new_task(message.from_user.id)
+    id_ = await database.TaskDB().create_new_task(message.from_user.id)
     await state.update_data(task_type=database.TaskType.PRINT_TASK)
     await state.update_data(id=id_)
     await require_file(message, state)
@@ -117,7 +117,7 @@ async def pay_way(message: types.Message, state: FSMContext):
                          data["file_path"], data["number_of_copies"],
                          data["coast"], data["sides_count"], None, pay_way,
                          database.TaskStatus.CONFIRMING)
-    await database.Database().finish_print_task_creation(task)
+    await database.TaskDB().finish_print_task_creation(task)
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ печать№ {task.id_}",
                                reply_markup=admin_keyboard.get_scan_task_keyboard(task.id_))
