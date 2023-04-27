@@ -96,7 +96,7 @@ async def printing_mode(message: types.Message, state: FSMContext):
 @router.message(PrintTask.choose_pay_way)
 async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
-        pay_way = database.PayWay.CARD
+        pay_way = database.PayWay.ONLINE
         numbers = Shift().get_active_number()
         msg = 'Переведите средства через СБП в банк "Тинькофф" по номер'+ \
               ('у: ' if len(numbers) == 1 else 'ам: ')
@@ -110,6 +110,10 @@ async def pay_way(message: types.Message, state: FSMContext):
         await message.answer("Ваш заказ принят к ожиданию. Ожидаем с наличными "
                              "в комнате 254.",
                              reply_markup=get_main_keyboard())
+    elif message.text == "По карте на Юмани":
+        pay_way = database.PayWay.CARD
+        url = ""
+
     else:
         return
     data = await state.get_data()
@@ -120,5 +124,5 @@ async def pay_way(message: types.Message, state: FSMContext):
     await database.TaskDB().finish_print_task_creation(task)
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ печать№ {task.id_}",
-                               reply_markup=admin_keyboard.get_scan_task_keyboard(task.id_))
+                               reply_markup=admin_keyboard.get_print_task_keyboard(task.id_))
     await state.clear()

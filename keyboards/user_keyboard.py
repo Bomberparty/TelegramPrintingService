@@ -34,6 +34,7 @@ def get_printing_method_kb() -> ReplyKeyboardMarkup:
 def pay_way_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],
+        [KeyboardButton(text="По карте на Юмани")],
         [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)

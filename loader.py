@@ -9,6 +9,8 @@ admins = list(map(int, config["ADMINS"]["admin_id"].split()))
 
 admin_nspk_number = list(map(int, config["ADMINS"]["admin_nspk_number"].split()))
 
+yoomoney_token = config["YOOMONEY"]["token"]
+
 bot = Bot(token=config['DEFAULT']['token'])
 
 dp = Dispatcher()

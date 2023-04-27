@@ -20,8 +20,9 @@ class Format(Enum):
 
 
 class PayWay(Enum):
-    CARD = 0
+    ONLINE = 0
     CASH = 1
+    CARD = 2
 
 
 class TaskStatus(Enum):

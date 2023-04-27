@@ -59,7 +59,7 @@ async def get_format(message: types.Message, state: FSMContext):
 @router.message(ScanTask.choose_pay_way)
 async def pay_way(message: types.Message, state: FSMContext):
     if message.text == "По карте через СБП":
-        pay_way = database.PayWay.CARD
+        pay_way = database.PayWay.ONLINE
         numbers = Shift().get_active_number()
         msg = 'Переведите средства через СБП в банк "Тинькофф" по номер'+ \
               ('у: ' if len(numbers) == 1 else 'ам: ')
