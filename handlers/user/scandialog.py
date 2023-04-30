@@ -52,7 +52,7 @@ async def get_format(message: types.Message, state: FSMContext):
     await state.update_data(coast=coast)
     await message.answer(f'''Стоимость заказа составляет {coast} рублей. 
     Теперь выберите удобный для вас метод оплаты''',
-                         reply_markup=pay_way_keyboard())
+                         reply_markup=pay_way_keyboard(coast))
     await state.set_state(ScanTask.choose_pay_way)
 
 

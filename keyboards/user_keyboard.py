@@ -31,12 +31,19 @@ def get_printing_method_kb() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-def pay_way_keyboard() -> ReplyKeyboardMarkup:
-    kb = [
-        [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],
-        [KeyboardButton(text="По карте на Юмани")],
-        [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
-    ]
+def pay_way_keyboard(task_cost) -> ReplyKeyboardMarkup:
+    if task_cost >= 10:
+        kb = [
+            [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],
+            [KeyboardButton(text="По карте на Юмани")],
+            [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
+        ]
+    else:
+        kb = [
+            [KeyboardButton(text="Наличными при встрече")],
+            [KeyboardButton(text="По карте на Юмани")],
+            [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
+        ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
 
