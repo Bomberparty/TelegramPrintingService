@@ -53,5 +53,6 @@ class TaskCompletingStatusFilter(Filter):
     async def __call__(self, callback_query: CallbackQuery, *args) -> bool:
         db = TaskDB()
         data = PrintTaskCompletingCallback.unpack(callback_query.data)
+        print(data)
         status = await db.get_task_status(data.task_id)
         return status in self.statuses

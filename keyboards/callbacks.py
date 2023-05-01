@@ -1,6 +1,7 @@
 from aiogram.filters.callback_data import CallbackData
-
 from enum import Enum, IntEnum
+
+from database import TaskType
 
 
 class Actions(IntEnum):
@@ -27,3 +28,10 @@ class ScanningCallback(CallbackData, prefix="scanning"):
     action: Actions
     task_id: int
     index: int
+
+
+class CardCallback(CallbackData, prefix="card"):
+    action: Actions
+    id_: int
+    task_type: TaskType
+    task_id: int

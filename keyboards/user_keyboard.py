@@ -1,6 +1,9 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton,\
     InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from database import TaskType
+from keyboards.callbacks import CardCallback, Actions
 
 def get_main_keyboard() -> ReplyKeyboardMarkup:
     kb = [
@@ -63,3 +66,18 @@ def get_format_keyboard() -> ReplyKeyboardMarkup:
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
+
+
+def get_card_keyboard(id_, task_type: TaskType, task_id) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Проверить",
+                                     callback_data=CardCallback(action=Actions.ACCEPT,
+                                                                id_=id_,
+                                                                task_type=task_type,
+                                                                task_id=task_id).pack()))
+    builder.add(InlineKeyboardButton(text="Отменить",
+                                     callback_data=CardCallback(action=Actions.CANCEL,
+                                                                id_=id_,
+                                                                task_type=task_type,
+                                                                task_id=task_id).pack()))
+    return builder.as_markup()

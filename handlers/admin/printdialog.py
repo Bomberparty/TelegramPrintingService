@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery
 from aiogram import F
 
 from keyboards.callbacks import AdminPrintTaskCallback, Actions, \
-    PrintTaskCompletingCallback
+    PrintTaskCompletingCallback, AdminScanTaskCallback
 from keyboards.admin_keyboard import get_print_completing_task_keyboard
 from database import TaskDB, TaskStatus
 from loader import bot
@@ -62,7 +62,8 @@ async def task_failed(callback: CallbackQuery,
                                          " с админами из 254 комнаты")
 
 
-@router.callback_query(PrintTaskCompletingCallback)
-@router.callback_query(AdminPrintTaskStatusFilter)
+@router.callback_query(PrintTaskCompletingCallback.filter())
+@router.callback_query(AdminPrintTaskCallback.filter())
+@router.callback_query(AdminScanTaskCallback.filter())
 async def bad_task(callback: CallbackQuery):
     await callback.message.edit_text("Заказ уже завершён, отменён или выполнен")
