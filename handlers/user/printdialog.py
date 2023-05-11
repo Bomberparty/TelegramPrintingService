@@ -146,12 +146,12 @@ async def print_task_information_to_admins(task: database.Task):
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"Новый заказ сканирования №: {task.id_}."
                                          f" Его стоимость составляет {task.coast} рублей.",
-                               reply_markup=admin_keyboard.get_scan_task_keyboard(task.id_))
+                               reply_markup=admin_keyboard.get_print_task_keyboard(task.id_))
 
 
 @router.callback_query(and_f(CardCallback.filter(F.action == Actions.ACCEPT),
-                             CardCallback.filter(F.task_type == database.TaskType.SCAN_TASK)))
+                             CardCallback.filter(F.task_type == database.TaskType.PRINT_TASK)))
 async def check_transaction(callback: CallbackQuery, callback_data: CardCallback):
     for admin_id in Shift().get_active():
         await bot.send_message(admin_id, f"СРОЧНО!. Оплачен заказ №: {callback_data.id_}.",
-                               reply_markup=admin_keyboard.get_scan_task_keyboard(callback_data.task_id))
+                               reply_markup=admin_keyboard.get_print_task_keyboard(callback_data.task_id))
