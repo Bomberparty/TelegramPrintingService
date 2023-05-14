@@ -3,6 +3,7 @@ import logging
 from os import path
 
 from database import Format
+from loader import scanner
 
 
 class ScanException(Exception):
@@ -15,7 +16,7 @@ class ConvertionException(Exception):
 
 async def get_scan_command(file_path) -> str:
     return " ".join(["scanimage", "-o", f"{file_path}", "--device",
-                     "'airscan:e0:Pantum-M6500W-Series FFFFFF (USB)'",
+                     scanner,
                      f"--format=png"])
 
 

@@ -1,5 +1,6 @@
 [DEFAULT]
 token = YOUR_TOKEN
+scanner = 'NAME_OF_SCANNER'
 
 [ADMINS]
 admin_id = ADMIN_ID1 ADMIN_ID2
