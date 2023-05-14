@@ -4,6 +4,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import TaskType
 from keyboards.callbacks import CardCallback, Actions
+from loader import yoomoney_enable
+
 
 def get_main_keyboard() -> ReplyKeyboardMarkup:
     kb = [
@@ -35,18 +37,13 @@ def get_printing_method_kb() -> ReplyKeyboardMarkup:
 
 
 def pay_way_keyboard(task_cost) -> ReplyKeyboardMarkup:
+    kb = [[KeyboardButton(text="Наличными при встрече")]]
     if task_cost >= 10:
-        kb = [
-            [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],
-            [KeyboardButton(text="По карте на Юмани")],
-            [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
-        ]
-    else:
-        kb = [
-            [KeyboardButton(text="Наличными при встрече")],
-            [KeyboardButton(text="По карте на Юмани")],
-            [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
-        ]
+        kb[0].append(KeyboardButton(text="По карте через СБП"))
+    if yoomoney_enable:
+        kb.append([KeyboardButton(text="По карте на Юмани")])
+
+    kb.append([KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")])
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
 
