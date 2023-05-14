@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, IntEnum
 import aiosqlite
 from typing import List, Tuple, Union
 
 
-class TaskType(Enum):
+class TaskType(IntEnum):
     PRINT_TASK = 0
     SCAN_TASK = 1
 
@@ -19,12 +19,13 @@ class Format(Enum):
     PDF = "pdf"
 
 
-class PayWay(Enum):
-    CARD = 0
+class PayWay(IntEnum):
+    ONLINE = 0
     CASH = 1
+    CARD = 2
 
 
-class TaskStatus(Enum):
+class TaskStatus(IntEnum):
     CREATION = 0
     CONFIRMING = 1
     PENDING = 2
@@ -68,8 +69,9 @@ def database_connect(func):
     return wrapper
 
 
-class Database:
-    """ Создаётся таблица с параметрами заказаadmins = 1241783757 994007689 708562074
+class TaskDB:
+    """ Создаётся таблица с параметрами заказа
+    admins = 1241783757 994007689 708562074
 
     Параметр confirmed отвечает за подтверждение заказа админом
     Рекомендуется проверять сначала confirmed, а затем pending"""
@@ -151,8 +153,24 @@ class Database:
         return result
 
 
+class TransactionDB:
+    @database_connect
+    async def get_new_id(self, conn) -> int:
+        cursor = await conn.execute("SELECT MAX(id) FROM transactions")
+        result = (await cursor.fetchone())[0]
+        return (result if result is not None else -1) + 1
+
+    @database_connect
+    async def create_transaction(self, task_id: int, user_id: int, conn) -> int:
+        id_ = await self.get_new_id()
+        cursor = await conn.execute("""INSERT INTO transactions (id, user_id, 
+        task_id, status) VALUES (?, ?, ?, ?)""", (id_, user_id, task_id, 0))
+        await conn.commit()
+        return id_
+
+
 async def main():
-    a = await Database().get_confirming_task_list()
+    a = await TaskDB().get_confirming_task_list()
     print(a)
     # await Database().create_new_task(123)
     # task = Task(0, 200, TaskType.PRINT_TASK, "1.pdf", 1, 5,

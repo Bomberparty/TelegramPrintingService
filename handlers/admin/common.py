@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 
 from keyboards.admin_keyboard import get_print_task_keyboard, \
     get_scan_task_keyboard
-from database import Database, TaskStatus, TaskType
+from database import TaskDB, TaskStatus, TaskType
 from keyboards.callbacks import AdminPrintTaskCallback, Actions, \
     AdminScanTaskCallback
 from loader import bot
@@ -32,7 +32,7 @@ async def finish_shift(message: Message):
 
 @router.message(and_f(Command("gcptl"), IsAdminFilter(True)))
 async def get_confirming_task_list(message: Message):
-    tasks = await Database().get_confirming_task_list(TaskType.PRINT_TASK)
+    tasks = await TaskDB().get_confirming_task_list(TaskType.PRINT_TASK)
     await message.answer("Список действующих заказов на печать:")
     for id_ in tasks:
         kb = get_print_task_keyboard(id_[0])
@@ -41,7 +41,7 @@ async def get_confirming_task_list(message: Message):
 
 @router.message(and_f(Command("gcstl"), IsAdminFilter(True)))
 async def get_confirming_task_list(message: Message):
-    tasks = await Database().get_confirming_task_list(TaskType.SCAN_TASK)
+    tasks = await TaskDB().get_confirming_task_list(TaskType.SCAN_TASK)
     await message.answer("Список действующих заказов на сканирование:")
     for id_ in tasks:
         kb = get_scan_task_keyboard(id_[0])
@@ -54,7 +54,7 @@ async def get_confirming_task_list(message: Message):
                              AdminScanTaskStatusFilter(TaskStatus.CONFIRMING)))
 async def cancel_task(callback: CallbackQuery,
                       callback_data: AdminPrintTaskCallback):
-    db = Database()
+    db = TaskDB()
     message = f"Заказ №{callback_data.task_id} отменён."
     await db.update_task_status(callback_data.task_id, TaskStatus.CANCELED)
     await callback.message.edit_text(message)

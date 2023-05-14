@@ -3,4 +3,5 @@ python-dotenv==0.21.1
 configparser==5.3.0
 pypdf2==3.0.1
 aiosqlite~=0.18.0
-aioschedule~=0.5.2
+aioschedule==0.5.2
+yoomoney==0.1.0

@@ -1,5 +1,10 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton,\
     InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from database import TaskType
+from keyboards.callbacks import CardCallback, Actions
+from loader import yoomoney_enable
 
 
 def get_main_keyboard() -> ReplyKeyboardMarkup:
@@ -31,11 +36,14 @@ def get_printing_method_kb() -> ReplyKeyboardMarkup:
     return keyboard
 
 
-def pay_way_keyboard() -> ReplyKeyboardMarkup:
-    kb = [
-        [KeyboardButton(text="По карте через СБП"), KeyboardButton(text="Наличными при встрече")],
-        [KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")]
-    ]
+def pay_way_keyboard(task_cost) -> ReplyKeyboardMarkup:
+    kb = [[KeyboardButton(text="Наличными при встрече")]]
+    if task_cost >= 10:
+        kb[0].append(KeyboardButton(text="По карте через СБП"))
+    if yoomoney_enable:
+        kb.append([KeyboardButton(text="По карте на Юмани")])
+
+    kb.append([KeyboardButton(text="Отмена"), KeyboardButton(text="Назад")])
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
 
@@ -55,3 +63,18 @@ def get_format_keyboard() -> ReplyKeyboardMarkup:
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
+
+
+def get_card_keyboard(id_, task_type: TaskType, task_id) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Проверить",
+                                     callback_data=CardCallback(action=Actions.ACCEPT,
+                                                                id_=id_,
+                                                                task_type=task_type,
+                                                                task_id=task_id).pack()))
+    builder.add(InlineKeyboardButton(text="Отменить",
+                                     callback_data=CardCallback(action=Actions.CANCEL,
+                                                                id_=id_,
+                                                                task_type=task_type,
+                                                                task_id=task_id).pack()))
+    return builder.as_markup()
