@@ -23,12 +23,12 @@ async def accept_task(callback: CallbackQuery,
                       callback_data: AdminPrintTaskCallback):
     task = await TaskDB().get_task(callback_data.task_id)
     try:
+        await TaskDB().update_task_status(task.id_, TaskStatus.PENDING)
         await callback.message.edit_text(f"Началась печать заказа № {task.id_}",
                                          reply_markup=get_print_completing_task_keyboard(task.id_))
         await bot.send_message(task.user_id, "Началась печать")
         await print_file(file_path=task.file_path, copies=task.number_of_copies,
                          mode=task.sides_count)
-        await TaskDB().update_task_status(task.id_, TaskStatus.PENDING)
     except PrintException as ex:
         logging.exception(ex)
         await callback.message.edit_text(f"Печать заказа № {task.id_}"
