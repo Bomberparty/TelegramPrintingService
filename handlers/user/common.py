@@ -11,19 +11,19 @@ from filters import IsAnyAdminsOnShiftFilter
 router = Router()
 
 
-@router.message(and_f(StateFilter("*"),
-                      or_f(Text("Отмена"), Command("cancel"))))
+@router.message(and_f(StateFilter("*"), or_f(Text("Отмена"), Command("cancel"))))
 async def cancel(message: types.Message, state: FSMContext):
     await state.clear()
     await start(message)
 
 
-@router.message(or_f(Command("start", "help"),
-                     and_f(ChooseTask.step, Text("Назад"))))
+@router.message(or_f(Command("start", "help"), and_f(ChooseTask.step, Text("Назад"))))
 async def start(message: types.Message):
-    await message.answer('''Доброго времени суток, дорогой пользователь.\n'''
-                         '''Для запуска сервиса нажмите\n"Создать заказ" ''',
-                         reply_markup=get_main_keyboard())
+    await message.answer(
+        """Доброго времени суток, дорогой пользователь.\n"""
+        """Для запуска сервиса нажмите\n"Создать заказ" """,
+        reply_markup=get_main_keyboard(),
+    )
 
 
 @router.message(and_f(StateFilter("*"), IsAnyAdminsOnShiftFilter(False)))
@@ -33,11 +33,14 @@ async def no_admins(message: types.Message, state: FSMContext):
         await state.clear()
 
 
-@router.message(or_f(Text("Создать заказ"),
-                     and_f(or_f(PrintTask.send_file,
-                                ScanTask.number_of_documents), Text("Назад"))))
+@router.message(
+    or_f(
+        Text("Создать заказ"),
+        and_f(or_f(PrintTask.send_file, ScanTask.number_of_documents), Text("Назад")),
+    )
+)
 async def create_task(message: types.Message, state: FSMContext):
-    await message.answer("Выберите вид заказа",
-                         reply_markup=get_choosing_task_keyboard())
+    await message.answer(
+        "Выберите вид заказа", reply_markup=get_choosing_task_keyboard()
+    )
     await state.set_state(ChooseTask.step)
-

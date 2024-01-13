@@ -1,5 +1,5 @@
 from aiogram.filters.callback_data import CallbackData
-from enum import Enum, IntEnum
+from enum import IntEnum
 
 from database import TaskType
 

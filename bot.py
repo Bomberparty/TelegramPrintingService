@@ -17,5 +17,6 @@ async def main():
     asyncio.create_task(register_services())
     await dp.start_polling(bot)
 
+
 if __name__ == "__main__":
     asyncio.run(main())

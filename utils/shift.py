@@ -3,18 +3,17 @@ from loader import admins, admin_nspk_number
 
 class Shift:
     _instance = None
-    admins = {adm_id: number for adm_id, number in
-              zip(admins, admin_nspk_number)}
+    admins = {adm_id: number for adm_id, number in zip(admins, admin_nspk_number)}
     on_shift = []
 
     @classmethod
     def start(cls, admin_id):
-        if not(admin_id in cls.on_shift):
+        if admin_id not in cls.on_shift:
             cls.on_shift.append(admin_id)
-            #Возвращает True, если выод на смену удачен
+            # Возвращает True, если выод на смену удачен
             return True
         else:
-            #Возвращает False, если неуадчен
+            # Возвращает False, если неуадчен
             return False
 
     @classmethod

@@ -16,4 +16,3 @@ class ScanTask(StatesGroup):
     number_of_documents = State()
     choose_format = State()
     choose_pay_way = State()
-

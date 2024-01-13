@@ -12,11 +12,11 @@ async def cancel_old_tasks():
     for task_id in id_list:
         file_path = os.path.join(directory, f"{task_id[0]}.pdf")
         a = os.path.getmtime(file_path)
-        time = (datetime.datetime.utcnow() -
-                datetime.datetime.utcfromtimestamp(a)).seconds
+        time = (
+            datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(a)
+        ).seconds
         if time > 24 * 60 * 60:
-            await database.TaskDB().\
-                update_task_status(database.TaskStatus.CANCELED)
+            await database.TaskDB().update_task_status(database.TaskStatus.CANCELED)
 
 
 async def register_services():

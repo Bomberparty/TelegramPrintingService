@@ -3,8 +3,11 @@ from aiogram.types import Message, CallbackQuery
 
 from loader import admins
 from utils.shift import Shift
-from keyboards.callbacks import AdminPrintTaskCallback,\
-    PrintTaskCompletingCallback, AdminScanTaskCallback
+from keyboards.callbacks import (
+    AdminPrintTaskCallback,
+    PrintTaskCompletingCallback,
+    AdminScanTaskCallback,
+)
 from database import TaskDB
 
 
