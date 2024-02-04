@@ -12,6 +12,14 @@ This is a telegram bot for handling paid printing service. It has several functi
 - Not finished payment system via Russian service [YooKassa](https://yookassa.ru/)
 - Notification system for stuff (admins) via Shift mechanism
 
+## 2.0 Roadmap
+
+Here's our current goals for this project right now:
+- [ ] Rewrite interactions with database to SQLAlchemy
+- [ ] Get rid of garbage code
+- [ ] Resolve [issues](https://github.com/Bomberparty/TelegramPrintingService/issues)
+- [ ] Rewrite configs to TOML
+
 ## Contributing
 
 Do not try to contribute to this repository! You'll stuck in understanding this garbage code. Even [ruff](https://github.com/astral-sh/ruff) didn't understand our philosophy, so you don't even try.
