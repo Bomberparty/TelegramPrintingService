@@ -10,7 +10,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    run_migrations()
+    # Commented this for now, since there's no sense in migrations
+    # run_migrations()
+    
     await bot.delete_webhook()
     dp.include_router(admin.router)
     dp.include_router(user.router)
