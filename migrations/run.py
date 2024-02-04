@@ -6,7 +6,7 @@ CURRENT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _get_files():
-    migrations_path = f"{CURRENT_PATH}/schemes"
+    migrations_path = f"{CURRENT_PATH}/schemas"
 
     for file in os.listdir(migrations_path):
         if os.path.isfile(os.path.join(migrations_path, file)):
@@ -37,7 +37,7 @@ def run_migrations():
         last_version = int(file.split("_")[1].split(".")[0])
         if last_version > current_version:
             # Если есть, запускаем миграцию
-            file_path = f"{CURRENT_PATH}/schemes/{file}"
+            file_path = f"{CURRENT_PATH}/schemas/{file}"
             _run_migration(file_path)
 
         # Записываем номер миграции, которую только что запустили, т.к это последняя версия бд
