@@ -31,7 +31,7 @@ def get_print_task_keyboard(id_: int) -> InlineKeyboardMarkup:
 
 
 def get_scan_task_keyboard(id_: int) -> InlineKeyboardMarkup:
-    """ВЫдаёт клавиатуру с началом сканирования"""
+    # Возвращает клавиатуру с началом сканирования
     builder = InlineKeyboardBuilder()
     builder.add(
         InlineKeyboardButton(
@@ -74,7 +74,7 @@ def get_print_completing_task_keyboard(id_: int) -> InlineKeyboardMarkup:
 
 
 def get_scanning_keyboard(id_: int, index: int) -> InlineKeyboardMarkup:
-    """ВЫдаёт клавиатуру с поэтапной печатью"""
+    # Возвращает клавиатуру с поэтапной печатью
     builder = InlineKeyboardBuilder()
     builder.add(
         InlineKeyboardButton(
