@@ -15,10 +15,10 @@ This is a telegram bot for handling paid printing service. It has several functi
 ## 2.0 Roadmap
 
 Here's our current goals for this project right now:
-- [ ] Rewrite interactions with database to SQLAlchemy
-- [ ] Get rid of garbage code
-- [ ] Resolve [issues](https://github.com/Bomberparty/TelegramPrintingService/issues)
-- [ ] Rewrite configs to TOML
+- [ ] [Rewrite interactions with database to SQLAlchemy](https://github.com/Bomberparty/TelegramPrintingService/issues/16)
+- [ ] [Get rid of garbage code](https://github.com/Bomberparty/TelegramPrintingService/issues/17)
+- [ ] [Resolve  "Not working on windows" issue](https://github.com/Bomberparty/TelegramPrintingService/issues/15)
+- [ ] [Rewrite configs to TOML](https://github.com/Bomberparty/TelegramPrintingService/issues/18)
 
 ## Contributing
 
