@@ -12,8 +12,8 @@ def prepare_to_downloading(file_path):
 
 
 def get_number_of_pages(file_path) -> int:
-    """Возвращает количесвто страниц, если файл валиден. В противном случае
-    возвращает 0"""
+    """Возвращает количесвто страниц, если файл валиден. 
+    В противном случае возвращает 0"""
     try:
         file = PdfReader(file_path)
         number_of_pages = len(file.pages)
