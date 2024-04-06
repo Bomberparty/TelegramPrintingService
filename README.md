@@ -1,5 +1,8 @@
 # TelegramPrintingService
 
+> [!NOTE]
+> This repo is now an **archive**. All further developmment will be done on other sources. For now work progress (if there is any) might be seen [here](http://brpxd.sytes.net/brpxd/TelegramPrintingService).
+
 ## Overview
 
 This is a telegram bot for handling paid printing service. It has several functions including:
